@@ -20,19 +20,31 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="title"/>
+            android:hint="title" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Description" />
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="description"/>
+        <LinearLayout
+            style="@style/LinearLayoutAdd"
+            android:weightSum="1">
+
+            <EditText
+                android:layout_width="272dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.64"
+                android:hint="description" />
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/microphone_green" />
+        </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/add_location"
             style="@style/LinearLayoutAdd">
 
             <ImageView
@@ -41,13 +53,12 @@
                 android:src="@drawable/location_green" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="Add Location"/>
+                style="@style/TextViewDescription"
+                android:text="Add Location" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/add_time"
             style="@style/LinearLayoutAdd">
 
             <ImageView
@@ -56,12 +67,12 @@
                 android:src="@drawable/time_green" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Add time"/>
+                style="@style/TextViewDescription"
+                android:text="Add time" />
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/add_image"
             style="@style/LinearLayoutAdd">
 
             <ImageView
@@ -70,11 +81,15 @@
                 android:src="@drawable/camera_green" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Add Image"/>
+                style="@style/TextViewDescription"
+                android:text="Add Image" />
         </LinearLayout>
 
-
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ok" />
     </LinearLayout>
+
+
 </ScrollView>
