@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public class AddNewItem extends AppCompatActivity {
 
     //permissions
@@ -24,6 +26,12 @@ public class AddNewItem extends AppCompatActivity {
     private LinearLayout addTime;
     private LinearLayout addLocation;
     private LinearLayout addImage;
+
+    //
+    public static final LatLng KEY_LAT_LONG = new LatLng(0, 0);
+    public static final float KEY_RADIUS = 1;
+    public static final int KEY_REQUEST_LOCATION = 10;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +73,19 @@ public class AddNewItem extends AppCompatActivity {
 
     private void startLocationActivity() {
         Intent intent = new Intent(AddNewItem.this, LocationActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, KEY_REQUEST_LOCATION);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case KEY_REQUEST_LOCATION:
+                if(resultCode == RESULT_OK){
+
+                }
+                break;
+        }
     }
 
     private void requestPermission(String key){
@@ -76,7 +96,6 @@ public class AddNewItem extends AppCompatActivity {
                 ActivityCompat.requestPermissions(AddNewItem.this, permission, REQUEST_LOCATION_PERMISSION);
             }
         }
-
     }
 
     private boolean checkPermission(String key){
