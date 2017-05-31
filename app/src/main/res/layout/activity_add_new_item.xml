@@ -53,6 +53,7 @@
                 android:src="@drawable/location_green" />
 
             <TextView
+                android:id="@+id/location_textView"
                 style="@style/TextViewDescription"
                 android:text="Add Location" />
         </LinearLayout>

@@ -1,5 +1,6 @@
 package com.ferit.dfundak.georeminder;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -50,19 +51,20 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         this.addressTextView = (TextView) findViewById(R.id.address);
         this.okButton = (Button) findViewById(R.id.ok_button);
         this.radiusInput = (EditText) findViewById(R.id.radius_input);
+        radiusInput.setText("1");
 
         this.initialize();
 
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              /*  radius = Float.parseFloat(radiusInput.getText().toString());
+                radius = Float.parseFloat(radiusInput.getText().toString());
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra(AddNewItem.KEY_LAT_LONG, pinnedLocation);
-                resultIntent.putExtra(AddNewItem.KEY_RADIUS, radius);
-                this.setResult(RESULT_OK, resultIntent);
-                this.finish();
-                */
+                resultIntent.putExtra("KEY_RADIUS", radius);
+                resultIntent.putExtra("KEY_LAT", pinnedLocation.latitude);
+                resultIntent.putExtra("KEY_LNG", pinnedLocation.longitude);
+                setResult(RESULT_OK, resultIntent);
+                finish();
             }
         });
     }
