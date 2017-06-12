@@ -112,7 +112,7 @@ public class AddNewItem extends AppCompatActivity {
     }
 
     private void setTime() {
-        
+
     }
 
     private void startLocationActivity() {
@@ -375,7 +375,7 @@ public class AddNewItem extends AppCompatActivity {
 
     private File createImageFile() throws IOException {
 
-        String imageFileName = "GeoReminder_" + System.currentTimeMillis()+".jpg";
+        String imageFileName = "GeoReminder_" + System.currentTimeMillis();
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
