@@ -58,44 +58,76 @@
                 android:text="Add Location" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/add_time"
-            style="@style/LinearLayoutAdd">
+        <LinearLayout style="@style/LinearLayoutAdd">
 
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/time_green" />
-
-            <TextView
-                style="@style/TextViewDescription"
-                android:text="Add time" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/add_image"
-            style="@style/LinearLayoutAdd">
-
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/camera_green" />
-
-            <TextView
-                style="@style/TextViewDescription"
-                android:text="Add Image" />
-
-            <ImageView
-                android:id="@+id/image_view"
+            <LinearLayout
+                android:id="@+id/add_time"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/time_green" />
+
+                <TextView
+                    android:id="@+id/time_textView"
+                    style="@style/TextViewDescription"
+                    android:text="Add time" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/add_date"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="50dp">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/calendar_green" />
+
+                <TextView
+                    android:id="@+id/date_textView"
+                    style="@style/TextViewDescription"
+                    android:text="Add date" />
+            </LinearLayout>
         </LinearLayout>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ok" />
-    </LinearLayout>
+        <LinearLayout style="@style/LinearLayoutAdd">
+
+            <LinearLayout
+                android:id="@+id/add_image"
+                style="@style/LinearLayoutAdd">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/camera_green" />
+
+                <TextView
+                    style="@style/TextViewDescription"
+                    android:text="Add Image" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="50dp">
+
+                <ImageView
+                    android:id="@+id/image_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
+         </LinearLayout>
 
 
-</ScrollView>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ok" />
+</LinearLayout>
+
+
+    </ScrollView>

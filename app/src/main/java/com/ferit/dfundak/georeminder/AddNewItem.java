@@ -1,6 +1,9 @@
 package com.ferit.dfundak.georeminder;
 
 import android.Manifest;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,15 +17,19 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -31,6 +38,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -45,8 +53,11 @@ public class AddNewItem extends AppCompatActivity {
     private LinearLayout addTime;
     private LinearLayout addLocation;
     private LinearLayout addImage;
+    private LinearLayout addDate;
     private TextView locationAddress;
     private ImageView imageView;
+    private static TextView timeText;
+    private static TextView dateText;
 
     //Intent
     public static final int KEY_REQUEST_LOCATION = 10;
@@ -56,6 +67,62 @@ public class AddNewItem extends AppCompatActivity {
 
     //
     private String mCurrentPhotoPath;
+    private static int hour = 0;
+    private static int minute = 0;
+    private static int day = 0;
+    private static int month;
+    private static int year;
+
+    public static class TimePickerFragment extends DialogFragment
+            implements TimePickerDialog.OnTimeSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar c = Calendar.getInstance();
+            if (hour == 0) {
+                hour = c.get(Calendar.HOUR_OF_DAY);
+                minute = c.get(Calendar.MINUTE);
+            }
+
+            return new TimePickerDialog(getActivity(), this, hour, minute, DateFormat.is24HourFormat(getActivity()));
+        }
+
+        public void onTimeSet(TimePicker view, int hourPicked, int minutePicked) {
+            if(minutePicked<10){
+                timeText.setText(hourPicked + ":0" + minutePicked);
+            }
+            else {
+                timeText.setText(hourPicked + ":" + minutePicked);
+            }
+            hour = hourPicked;
+            minute = minutePicked;
+        }
+    }
+
+    public static class DatePickerFragment extends DialogFragment
+            implements DatePickerDialog.OnDateSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Calendar c = Calendar.getInstance();
+
+            if (day == 0) {
+                year = c.get(Calendar.YEAR);
+                month = c.get(Calendar.MONTH);
+                day = c.get(Calendar.DAY_OF_MONTH);
+            }
+            DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
+            dialog.getDatePicker().setMinDate(c.getTimeInMillis());
+            return dialog;
+        }
+
+        public void onDateSet(DatePicker view, int yearPicked, int monthPicked, int dayPicked) {
+            dateText.setText(day + "." + (month + 1) + "." + year);
+            day = dayPicked;
+            month = monthPicked;
+            year = yearPicked;
+        }
+    }
 
 
     @Override
@@ -66,16 +133,18 @@ public class AddNewItem extends AppCompatActivity {
         addImage = (LinearLayout) findViewById(R.id.add_image);
         addLocation = (LinearLayout) findViewById(R.id.add_location);
         addTime = (LinearLayout) findViewById(R.id.add_time);
+        addDate = (LinearLayout) findViewById(R.id.add_date);
         locationAddress = (TextView) findViewById(R.id.location_textView);
         imageView = (ImageView) findViewById(R.id.image_view);
-
+        timeText = (TextView) findViewById(R.id.time_textView);
+        dateText = (TextView) findViewById(R.id.date_textView);
 
         addLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!checkPermission("LOCATION")) {
+                if (!checkPermission("LOCATION")) {
                     requestPermission("LOCATION");
-                }else{
+                } else {
                     startLocationActivity();
                 }
             }
@@ -84,14 +153,14 @@ public class AddNewItem extends AppCompatActivity {
         addImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!checkPermission("CAMERA") || !checkPermission("STORAGE")) {
-                    if(!checkPermission("CAMERA")){
+                if (!checkPermission("CAMERA") || !checkPermission("STORAGE")) {
+                    if (!checkPermission("CAMERA")) {
                         requestPermission("CAMERA");
                     }
-                    if(!checkPermission("STORAGE")){
+                    if (!checkPermission("STORAGE")) {
                         requestPermission("STORAGE");
                     }
-                }else{
+                } else {
                     try {
                         takePicture();
                     } catch (IOException e) {
@@ -104,15 +173,20 @@ public class AddNewItem extends AppCompatActivity {
         addTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setTime();
+                DialogFragment newFragment = new TimePickerFragment();
+                newFragment.show(getSupportFragmentManager(), "timePicker");
+            }
+        });
+
+        addDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment newFragment = new DatePickerFragment();
+                newFragment.show(getSupportFragmentManager(), "datePicker");
             }
         });
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-    }
-
-    private void setTime() {
-
     }
 
     private void startLocationActivity() {
@@ -123,22 +197,21 @@ public class AddNewItem extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode){
+        switch (requestCode) {
             case KEY_REQUEST_LOCATION:
-                if(resultCode == RESULT_OK) {
-                    if( data.getExtras() != null) {
+                if (resultCode == RESULT_OK) {
+                    if (data.getExtras() != null) {
                         double lat = data.getExtras().getDouble("KEY_LAT");
                         double lng = data.getExtras().getDouble("KEY_LNG");
                         float radius = data.getExtras().getFloat("KEY_RADIUS");
-                        Log.i("dora ", lat +" "+ lng + "  " + radius);
+                        Log.i("dora ", lat + " " + lng + "  " + radius);
                         LatLng location = new LatLng(lat, lng);
                         setLocationAddress(location);
-                    }
-                    else Log.i("dora", "fail");
+                    } else Log.i("dora", "fail");
                     break;
                 }
             case REQUEST_IMAGE_CAPTURE:
-                if(resultCode == RESULT_OK) {
+                if (resultCode == RESULT_OK) {
                     Uri imageUri = Uri.parse(mCurrentPhotoPath);
                     File file = new File(imageUri.getPath());
                     try {
@@ -159,7 +232,7 @@ public class AddNewItem extends AppCompatActivity {
         }
     }
 
-    private void requestPermission(String key){
+    private void requestPermission(String key) {
         switch (key) {
             case "LOCATION": {
                 Log.i("dora", "request location permission");
@@ -182,25 +255,22 @@ public class AddNewItem extends AppCompatActivity {
         }
     }
 
-    private boolean checkPermission(String key){
+    private boolean checkPermission(String key) {
         switch (key) {
             case "LOCATION": {
-                if(ActivityCompat.checkSelfPermission(AddNewItem.this, Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
+                if (ActivityCompat.checkSelfPermission(AddNewItem.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     return true;
-                }
-                else return false;
+                } else return false;
             }
             case "CAMERA": {
-                if(ActivityCompat.checkSelfPermission(AddNewItem.this, Manifest.permission.CAMERA)== PackageManager.PERMISSION_GRANTED){
+                if (ActivityCompat.checkSelfPermission(AddNewItem.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     return true;
-                }
-                else return false;
+                } else return false;
             }
             case "STORAGE": {
-                if(ActivityCompat.checkSelfPermission(AddNewItem.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)== PackageManager.PERMISSION_GRANTED){
+                if (ActivityCompat.checkSelfPermission(AddNewItem.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                     return true;
-                }
-                else return false;
+                } else return false;
             }
         }
         return false;
@@ -225,14 +295,13 @@ public class AddNewItem extends AppCompatActivity {
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         Log.d("dora", "Camera permission granted");
-                        if(checkPermission("STORAGE")) {
+                        if (checkPermission("STORAGE")) {
                             try {
                                 takePicture();
                             } catch (IOException e) {
                                 Log.e("dora", "Can't take picture");
                             }
-                        }
-                        else {
+                        } else {
                             requestPermission("STORAGE");
                         }
                     } else {
@@ -246,14 +315,13 @@ public class AddNewItem extends AppCompatActivity {
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         Log.d("dora", "Storage permission granted");
-                        if(checkPermission("CAMERA")){
+                        if (checkPermission("CAMERA")) {
                             try {
                                 takePicture();
                             } catch (IOException e) {
                                 Log.e("dora", "Can't take picture");
                             }
-                        }
-                        else{
+                        } else {
                             requestPermission("CAMERA");
                         }
                     } else {
@@ -266,7 +334,7 @@ public class AddNewItem extends AppCompatActivity {
         }
     }
 
-    private void askForPermission(String key){
+    private void askForPermission(String key) {
         switch (key) {
             case "LOCATION": {
                 boolean explain = ActivityCompat.shouldShowRequestPermissionRationale(AddNewItem.this, android.Manifest.permission.ACCESS_FINE_LOCATION);
@@ -329,7 +397,8 @@ public class AddNewItem extends AppCompatActivity {
                 .show();
     }
 
-    void setLocationAddress(LatLng latLng){
+    //translates address
+    void setLocationAddress(LatLng latLng) {
         if (Geocoder.isPresent()) {
             Geocoder geocoder = new Geocoder(this, Locale.getDefault());
             try {
@@ -353,6 +422,7 @@ public class AddNewItem extends AppCompatActivity {
     }
 
     Uri photoURI;
+
     private void takePicture() throws IOException {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Check if there is camera activity to handle the intent
@@ -374,12 +444,10 @@ public class AddNewItem extends AppCompatActivity {
     }
 
     private File createImageFile() throws IOException {
-
         String imageFileName = "GeoReminder_" + System.currentTimeMillis();
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
     }
-
 }
