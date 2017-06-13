@@ -48,16 +48,25 @@ public class AddNewItem extends AppCompatActivity {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     private static final int REQUEST_IMAGE_CAPTURE = 2;
     private static final int REQUEST_STORAGE_WRITING = 3;
+    private static final int REQUEST_RECORD_AUDIO = 4;
 
     //UI
     private LinearLayout addTime;
     private LinearLayout addLocation;
     private LinearLayout addImage;
     private LinearLayout addDate;
+    private ImageView addAudio;
     private TextView locationAddress;
     private ImageView imageView;
     private static TextView timeText;
     private static TextView dateText;
+
+    //icons
+    private ImageView locationIcon;
+    private ImageView cameraIcon;
+    private ImageView audioIcon;
+    private static ImageView timeIcon;
+    private static ImageView dateIcon;
 
     //Intent
     public static final int KEY_REQUEST_LOCATION = 10;
@@ -88,12 +97,8 @@ public class AddNewItem extends AppCompatActivity {
         }
 
         public void onTimeSet(TimePicker view, int hourPicked, int minutePicked) {
-            if(minutePicked<10){
-                timeText.setText(hourPicked + ":0" + minutePicked);
-            }
-            else {
-                timeText.setText(hourPicked + ":" + minutePicked);
-            }
+            //todo srediti s append
+            timeText.setText(hourPicked + ":" + minutePicked);
             hour = hourPicked;
             minute = minutePicked;
         }
@@ -134,6 +139,7 @@ public class AddNewItem extends AppCompatActivity {
         addLocation = (LinearLayout) findViewById(R.id.add_location);
         addTime = (LinearLayout) findViewById(R.id.add_time);
         addDate = (LinearLayout) findViewById(R.id.add_date);
+        addAudio = (ImageView) findViewById(R.id.add_audio);
         locationAddress = (TextView) findViewById(R.id.location_textView);
         imageView = (ImageView) findViewById(R.id.image_view);
         timeText = (TextView) findViewById(R.id.time_textView);
@@ -186,7 +192,57 @@ public class AddNewItem extends AppCompatActivity {
             }
         });
 
+        addAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!checkPermission("AUDIO")) {
+                    requestPermission("AUDIO");
+                } else {
+                    recordAudio();
+                }
+            }
+        });
+
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+    }
+
+    public void recordAudio() {
+        Log.i("dora", "in record audio");
+        /*
+        String fileName = "test";
+        final MediaRecorder recorder = new MediaRecorder();
+        ContentValues values = new ContentValues(3);
+        values.put(MediaStore.MediaColumns.TITLE, fileName);
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+        recorder.setOutputFile("/sdcard/sound/" + fileName);
+        try {
+            recorder.prepare();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        final ProgressDialog mProgressDialog = new ProgressDialog(AddNewItem.this);
+        mProgressDialog.setTitle("Recording");
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setButton("Stop recording", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                mProgressDialog.dismiss();
+                recorder.stop();
+                recorder.release();
+            }
+        });
+
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener(){
+            public void onCancel(DialogInterface p1) {
+                recorder.stop();
+                recorder.release();
+            }
+        });
+        recorder.start();
+        mProgressDialog.show();
+        */
     }
 
     private void startLocationActivity() {
@@ -194,6 +250,7 @@ public class AddNewItem extends AppCompatActivity {
         this.startActivityForResult(intent, KEY_REQUEST_LOCATION);
     }
 
+    //intent results
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -207,6 +264,8 @@ public class AddNewItem extends AppCompatActivity {
                         Log.i("dora ", lat + " " + lng + "  " + radius);
                         LatLng location = new LatLng(lat, lng);
                         setLocationAddress(location);
+                        locationIcon = (ImageView) findViewById(R.id.location_icon);
+                        locationIcon.setImageResource(R.drawable.location_green);
                     } else Log.i("dora", "fail");
                     break;
                 }
@@ -218,6 +277,8 @@ public class AddNewItem extends AppCompatActivity {
                         //show image in ImageView
                         InputStream ims = new FileInputStream(file);
                         imageView.setImageBitmap(BitmapFactory.decodeStream(ims));
+                        cameraIcon = (ImageView) findViewById(R.id.camera_icon);
+                        cameraIcon.setImageResource(R.drawable.picture_green);
                     } catch (FileNotFoundException e) {
                         return;
                     }
@@ -232,6 +293,7 @@ public class AddNewItem extends AppCompatActivity {
         }
     }
 
+    //PERMISSIONS HANDLING
     private void requestPermission(String key) {
         switch (key) {
             case "LOCATION": {
@@ -252,6 +314,12 @@ public class AddNewItem extends AppCompatActivity {
                 ActivityCompat.requestPermissions(AddNewItem.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE_WRITING);
                 break;
             }
+            case "AUDIO": {
+                Log.i("dora", "request record audio permission");
+                String[] permission = new String[]{Manifest.permission.RECORD_AUDIO};
+                ActivityCompat.requestPermissions(AddNewItem.this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO);
+                break;
+            }
         }
     }
 
@@ -269,6 +337,11 @@ public class AddNewItem extends AppCompatActivity {
             }
             case "STORAGE": {
                 if (ActivityCompat.checkSelfPermission(AddNewItem.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    return true;
+                } else return false;
+            }
+            case "AUDIO": {
+                if (ActivityCompat.checkSelfPermission(AddNewItem.this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                     return true;
                 } else return false;
             }
@@ -331,6 +404,18 @@ public class AddNewItem extends AppCompatActivity {
                     break;
                 }
             }
+            case REQUEST_RECORD_AUDIO: {
+                if (grantResults.length > 0) {
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        Log.d("dora", "Record audio permission granted");
+                        recordAudio();
+                    } else {
+                        Log.d("dora", "Record Audio permission denyed");
+                        askForPermission("AUDIO");
+                    }
+                    break;
+                }
+            }
         }
     }
 
@@ -341,7 +426,7 @@ public class AddNewItem extends AppCompatActivity {
                 if (explain) {
                     this.displayDialog("LOCATION");
                 } else {
-                    Log.i("dora", "No permission");
+                    Log.i("dora", "No LOCATION permission");
                 }
                 break;
             }
@@ -350,7 +435,7 @@ public class AddNewItem extends AppCompatActivity {
                 if (explain) {
                     this.displayDialog("CAMERA");
                 } else {
-                    Log.i("AddNewItem", "No permission");
+                    Log.i("AddNewItem", "No CAMERA permission");
                 }
                 break;
             }
@@ -359,7 +444,15 @@ public class AddNewItem extends AppCompatActivity {
                 if (explain) {
                     this.displayDialog("STORAGE");
                 } else {
-                    Log.i("AddNewItem", "No permission");
+                    Log.i("AddNewItem", "No STORAGE permission");
+                }
+            }
+            case "AUDIO": {
+                boolean explain = ActivityCompat.shouldShowRequestPermissionRationale(AddNewItem.this, Manifest.permission.RECORD_AUDIO);
+                if (explain) {
+                    this.displayDialog("AUDIO");
+                } else {
+                    Log.i("AddNewItem", "No AUDIO permission");
                 }
             }
         }
@@ -389,6 +482,10 @@ public class AddNewItem extends AppCompatActivity {
                             }
                             case "STORAGE": {
                                 requestPermission("STORAGE");
+                                dialog.cancel();
+                            }
+                            case "AUDIO": {
+                                requestPermission("AUDIO");
                                 dialog.cancel();
                             }
                         }

@@ -38,9 +38,10 @@
                 android:hint="description" />
 
             <ImageView
+                android:id="@+id/add_audio"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:src="@drawable/microphone_green" />
+                android:src="@drawable/microphone_black" />
         </LinearLayout>
 
         <LinearLayout
@@ -48,9 +49,10 @@
             style="@style/LinearLayoutAdd">
 
             <ImageView
+                android:id="@+id/location_icon"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:src="@drawable/location_green" />
+                android:src="@drawable/location_black" />
 
             <TextView
                 android:id="@+id/location_textView"
@@ -68,7 +70,7 @@
                 <ImageView
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@drawable/time_green" />
+                    android:src="@drawable/time_black" />
 
                 <TextView
                     android:id="@+id/time_textView"
@@ -85,7 +87,7 @@
                 <ImageView
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@drawable/calendar_green" />
+                    android:src="@drawable/calendar_black" />
 
                 <TextView
                     android:id="@+id/date_textView"
@@ -101,9 +103,10 @@
                 style="@style/LinearLayoutAdd">
 
                 <ImageView
+                    android:id="@+id/camera_icon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:src="@drawable/camera_green" />
+                    android:src="@drawable/camera_black" />
 
                 <TextView
                     style="@style/TextViewDescription"
