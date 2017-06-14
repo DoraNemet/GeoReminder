@@ -23,7 +23,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.DatePicker;
 import android.widget.ImageView;
@@ -208,6 +210,42 @@ public class AddNewItem extends AppCompatActivity {
 
     public void recordAudio() {
         Log.i("dora", "in record audio");
+
+        final Dialog popupDialog = new Dialog(this);
+        popupDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        popupDialog.setContentView(R.layout.add_new_item_record_popup);
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(popupDialog.getWindow().getAttributes());
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        popupDialog.show();
+        popupDialog.getWindow().setAttributes(lp);
+
+        ImageView cancelButton = (ImageView) popupDialog.findViewById(R.id.recording_cancel_button);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupDialog.dismiss();
+            }
+        });
+
+        final ImageView recordButton = (ImageView) popupDialog.findViewById(R.id.record_button);
+        recordButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        recordButton.setImageResource(R.drawable.microphone_green);
+                        return true;
+                    case MotionEvent.ACTION_UP:
+                        recordButton.setImageResource(R.drawable.microphone_black);
+                        popupDialog.dismiss();
+                        return true;
+                }
+                return false;
+            }
+        });
         /*
         String fileName = "test";
         final MediaRecorder recorder = new MediaRecorder();
