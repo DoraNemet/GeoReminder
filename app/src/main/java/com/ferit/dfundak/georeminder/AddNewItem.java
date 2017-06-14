@@ -10,6 +10,8 @@ import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
@@ -58,6 +60,7 @@ public class AddNewItem extends AppCompatActivity {
     private LinearLayout addImage;
     private LinearLayout addDate;
     private ImageView addAudio;
+    private ImageView playAudio;
     private TextView locationAddress;
     private ImageView imageView;
     private static TextView timeText;
@@ -66,7 +69,6 @@ public class AddNewItem extends AppCompatActivity {
     //icons
     private ImageView locationIcon;
     private ImageView cameraIcon;
-    private ImageView audioIcon;
     private static ImageView timeIcon;
     private static ImageView dateIcon;
 
@@ -83,6 +85,11 @@ public class AddNewItem extends AppCompatActivity {
     private static int day = 0;
     private static int month;
     private static int year;
+
+    // sound stuff
+    private MediaPlayer mediaPlayer;
+    private MediaRecorder recorder;
+    private String OUTPUT_FILE;
 
     public static class TimePickerFragment extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
@@ -137,11 +144,14 @@ public class AddNewItem extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_item);
 
+        OUTPUT_FILE = Environment.getExternalStorageDirectory() + "/audiorecorder.3ppp";
+
         addImage = (LinearLayout) findViewById(R.id.add_image);
         addLocation = (LinearLayout) findViewById(R.id.add_location);
         addTime = (LinearLayout) findViewById(R.id.add_time);
         addDate = (LinearLayout) findViewById(R.id.add_date);
         addAudio = (ImageView) findViewById(R.id.add_audio);
+        playAudio = (ImageView) findViewById(R.id.play_audio);
         locationAddress = (TextView) findViewById(R.id.location_textView);
         imageView = (ImageView) findViewById(R.id.image_view);
         timeText = (TextView) findViewById(R.id.time_textView);
@@ -183,6 +193,7 @@ public class AddNewItem extends AppCompatActivity {
             public void onClick(View v) {
                 DialogFragment newFragment = new TimePickerFragment();
                 newFragment.show(getSupportFragmentManager(), "timePicker");
+
             }
         });
 
@@ -202,6 +213,21 @@ public class AddNewItem extends AppCompatActivity {
                 } else {
                     recordAudio();
                 }
+            }
+        });
+
+        playAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playRecording();
+            }
+        });
+
+        playAudio.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                recordAudio();
+                return true;
             }
         });
 
@@ -234,53 +260,90 @@ public class AddNewItem extends AppCompatActivity {
         recordButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                switch(event.getAction()) {
+                switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         recordButton.setImageResource(R.drawable.microphone_green);
+                        beginRecording();
                         return true;
                     case MotionEvent.ACTION_UP:
                         recordButton.setImageResource(R.drawable.microphone_black);
+                        stopRecording();
                         popupDialog.dismiss();
+
                         return true;
                 }
                 return false;
             }
         });
-        /*
-        String fileName = "test";
-        final MediaRecorder recorder = new MediaRecorder();
-        ContentValues values = new ContentValues(3);
-        values.put(MediaStore.MediaColumns.TITLE, fileName);
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        recorder.setOutputFile("/sdcard/sound/" + fileName);
+    }
+
+    private void playRecording() {
+        stopMediaPlayer();
+
+        mediaPlayer = new MediaPlayer();
         try {
-            recorder.prepare();
-        } catch (Exception e){
+            mediaPlayer.setDataSource(OUTPUT_FILE);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        }
+        catch (Exception e){
             e.printStackTrace();
         }
+    }
 
-        final ProgressDialog mProgressDialog = new ProgressDialog(AddNewItem.this);
-        mProgressDialog.setTitle("Recording");
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        mProgressDialog.setButton("Stop recording", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                mProgressDialog.dismiss();
-                recorder.stop();
-                recorder.release();
-            }
-        });
+    private void stopPlayback(){
+        if(mediaPlayer != null){
+            mediaPlayer.stop();
+        }
+    }
 
-        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener(){
-            public void onCancel(DialogInterface p1) {
-                recorder.stop();
-                recorder.release();
+    private void stopMediaPlayer() {
+        if(mediaPlayer != null){
+            try{
+                mediaPlayer.release();
             }
-        });
+            catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void stopRecording() {
+        if(recorder != null){
+            recorder.stop();
+        }
+        addAudio.setVisibility(View.GONE);
+        playAudio.setVisibility(View.VISIBLE);
+    }
+
+    private void beginRecording() {
+        stopMediaRecorder();
+
+        File outFile = new File(OUTPUT_FILE);
+
+        if (outFile.exists()) {
+            outFile.delete();
+        }
+
+        recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
+        recorder.setOutputFile(OUTPUT_FILE);
+
+        try {
+            recorder.prepare();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
         recorder.start();
-        mProgressDialog.show();
-        */
+    }
+
+    private void stopMediaRecorder() {
+        if (recorder != null) {
+            recorder.release();
+        }
     }
 
     private void startLocationActivity() {
@@ -584,5 +647,13 @@ public class AddNewItem extends AppCompatActivity {
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopMediaRecorder();
+        stopPlayback();
+        stopMediaPlayer();
     }
 }

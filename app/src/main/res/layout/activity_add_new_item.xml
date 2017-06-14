@@ -42,6 +42,14 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/microphone_black" />
+
+            <ImageView
+                android:id="@+id/play_audio"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/play_button_green"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -68,6 +76,7 @@
                 android:layout_height="match_parent">
 
                 <ImageView
+                    android:id="@+id/time_icon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:src="@drawable/time_black" />
@@ -85,6 +94,7 @@
                 android:layout_marginLeft="50dp">
 
                 <ImageView
+                    android:id="@+id/date_icon"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:src="@drawable/calendar_black" />
@@ -123,14 +133,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
             </FrameLayout>
-         </LinearLayout>
+        </LinearLayout>
 
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ok" />
-</LinearLayout>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ok" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="cancle" />
+    </LinearLayout>
 
 
-    </ScrollView>
+</ScrollView>
