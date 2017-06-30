@@ -17,19 +17,21 @@ public class reminderItem {
     String mDescription;
     String mDate;
     String mTime;
+    String mImageName;
 
     public reminderItem(){}
 
-    public reminderItem(LatLng pinnedLocation, double radius, String title, String description, String date, String time) {
+    public reminderItem(LatLng pinnedLocation, double radius, String title, String description, String date, String time, String imageName) {
         this.mPinnedLocation = pinnedLocation;
         this.mRadius = radius;
         this.mTitle = title;
         this.mDescription = description;
         this.mDate = date;
         this.mTime = time;
+        this.mImageName = imageName;
     }
 
-    public reminderItem(int id, LatLng pinnedLocation, double radius, String title, String description, String date, String time) {
+    public reminderItem(int id, LatLng pinnedLocation, double radius, String title, String description, String date, String time, String imageName) {
         this.mId = id;
         this.mPinnedLocation = pinnedLocation;
         this.mRadius = radius;
@@ -37,6 +39,7 @@ public class reminderItem {
         this.mDescription = description;
         this.mDate = date;
         this.mTime = time;
+        this.mImageName = imageName;
     }
 
     public reminderItem(String title, String description, String date, String time) {
@@ -127,4 +130,11 @@ public class reminderItem {
         this.mId = id;
     }
 
+    public String getImageName() {
+        return mImageName;
+    }
+
+    public void setImageName(String mImageName) {
+        this.mImageName = mImageName;
+    }
 }

@@ -1,11 +1,18 @@
 package com.ferit.dfundak.georeminder;
 
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
@@ -47,6 +54,26 @@ public class ReminderAdapter extends BaseAdapter {
         reminderViewHolder.dateTv.setText(reminder.getTime());
         reminderViewHolder.timeTv.setText(reminder.getDate());
 
+        if(reminder.getImageName() != null){
+            String mCurrentPhotoPath = reminder.getImageName();
+            Uri imageUri = Uri.parse(mCurrentPhotoPath);
+            File file = new File(imageUri.getPath());
+            try {
+                //show image in ImageView
+                InputStream ims = new FileInputStream(file);
+                reminderViewHolder.picture.setImageBitmap(BitmapFactory.decodeStream(ims));
+            } catch (FileNotFoundException e) {
+
+            }
+            /*MediaScannerConnection.scanFile(AddNewItem.this,
+                    new String[]{imageUri.getPath()}, null,
+                    new MediaScannerConnection.OnScanCompletedListener() {
+                        public void onScanCompleted(String path, Uri uri) {
+                        }
+                    });
+            break;*/
+        }
+
         // za int reminderViewHolder.tvBookPageCount.setText(String.valueOf(book.getPageCount()));
         return convertView;
     }
@@ -58,6 +85,7 @@ public class ReminderAdapter extends BaseAdapter {
 
     public static class ViewHolder {
         public TextView titleTV, descriptionTV, timeTv, dateTv, addressTV;
+        public ImageView picture;
 
         public ViewHolder(View bookView) {
             titleTV = (TextView) bookView.findViewById(R.id.title);
@@ -65,6 +93,7 @@ public class ReminderAdapter extends BaseAdapter {
             timeTv = (TextView) bookView.findViewById(R.id.time);
             dateTv = (TextView) bookView.findViewById(R.id.date);
             addressTV = (TextView) bookView.findViewById(R.id.address);
+            picture = (ImageView) bookView.findViewById(R.id.picture);
         }
     }
 }

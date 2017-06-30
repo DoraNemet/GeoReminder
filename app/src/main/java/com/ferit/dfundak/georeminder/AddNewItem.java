@@ -97,13 +97,12 @@ public class AddNewItem extends AppCompatActivity {
     private String OUTPUT_FILE;
 
     //data to save
-    LatLng location = null;
-    double radius = 0;
-    String title = null;
-    String description = null;
-    String date = null;
-    String time = null;
-
+    private LatLng location = null;
+    private double radius = 0;
+    private String title = null;
+    private String description = null;
+    private String date = null;
+    private String time = null;
 
     //time picker fragment
     public static class TimePickerFragment extends DialogFragment
@@ -253,15 +252,6 @@ public class AddNewItem extends AppCompatActivity {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*
-                LatLng location;
-                float radius;
-                String title;
-                String description;
-                String date;
-                String time;
-                */
-                //LatLng pinnedLocation, float radius, String title, String description, String date, String time
 
                 if (titleET.getText() == null){
                     title  = null;
@@ -283,7 +273,7 @@ public class AddNewItem extends AppCompatActivity {
                     time = timeText.getText().toString();
                 }
 
-                reminderItem reminder = new reminderItem(location, radius, title, description, date, time);
+                reminderItem reminder = new reminderItem(location, radius, title, description, date, time, mCurrentPhotoPath);
 
                 DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
 

@@ -33,6 +33,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_LAT = "latitude";
     private static final String KEY_LONG = "longitude";
     private static final String KEY_RADIUS = "radius";
+    private static final String KEY_IMAGE_NAME = "imageName";
 
     private DatabaseHandler(Context context) {
         super(context.getApplicationContext(), DATABASE_NAME, null, DATABASE_VERSION);
@@ -65,10 +66,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             KEY_TIME + " TEXT," +
             KEY_LAT + " REAL," +
             KEY_LONG + " REAL,"+
-            KEY_RADIUS + " REAL" + ");";
+            KEY_RADIUS + " REAL," +
+            KEY_IMAGE_NAME + " TEXT);";
 
     static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_REMINDERS;
-    static final String SELECT_ALL = "SELECT " + KEY_ID + "," + KEY_TITLE + "," + KEY_DESCRIPTION + ","+ KEY_DATE + "," + KEY_TIME + "," + KEY_LAT + "," + KEY_LONG + ","+ KEY_RADIUS + " FROM " + TABLE_REMINDERS;
+    static final String SELECT_ALL = "SELECT " + KEY_ID + "," + KEY_TITLE + "," + KEY_DESCRIPTION + ","+ KEY_DATE + "," + KEY_TIME + "," + KEY_LAT + "," + KEY_LONG + ","+ KEY_RADIUS + "," + KEY_IMAGE_NAME +  " FROM " + TABLE_REMINDERS;
 
     public void insertReminder(reminderItem reminder){
         ContentValues contentValues = new ContentValues();
@@ -79,6 +81,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         contentValues.put(KEY_LAT, reminder.getLat());
         contentValues.put(KEY_LONG, reminder.getLong());
         contentValues.put(KEY_RADIUS, reminder.getRadius());
+        contentValues.put(KEY_IMAGE_NAME, reminder.getImageName());
 
         SQLiteDatabase writableDatabase = this.getWritableDatabase();
         long rowInserted = writableDatabase.insert(TABLE_REMINDERS, KEY_ID, contentValues);
@@ -109,9 +112,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 double lat = reminderCursor.getDouble(5);
                 double lon = reminderCursor.getDouble(6);
                 double radius = reminderCursor.getDouble(7);
+                String imageName = reminderCursor.getString(8);
                 LatLng pinnedLocation = new LatLng(lat, lon);
                 //LatLng pinnedLocation, float radius, String title, String description, String date, String time)
-                reminders.add(new reminderItem(id, pinnedLocation, radius, title, description, date, time));
+                reminders.add(new reminderItem(id, pinnedLocation, radius, title, description, date, time, imageName));
 
             }while(reminderCursor.moveToNext());
         }
