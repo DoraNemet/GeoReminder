@@ -97,12 +97,12 @@ public class AddNewItem extends AppCompatActivity {
     private String OUTPUT_FILE;
 
     //data to save
-    LatLng location;
-    double radius;
-    String title;
-    String description;
-    String date;
-    String time;
+    LatLng location = null;
+    double radius = 0;
+    String title = null;
+    String description = null;
+    String date = null;
+    String time = null;
 
 
     //time picker fragment
@@ -263,10 +263,25 @@ public class AddNewItem extends AppCompatActivity {
                 */
                 //LatLng pinnedLocation, float radius, String title, String description, String date, String time
 
-                title = titleET.getText().toString();
-                description = descriptionET.getText().toString();
-                date = dateText.getText().toString();
-                time = timeText.getText().toString();
+                if (titleET.getText() == null){
+                    title  = null;
+                } else{
+                    title = titleET.getText().toString();
+                }
+
+                if(descriptionET.getText()== null){
+                    description = null;
+                } else{
+                    description = descriptionET.getText().toString();
+                }
+
+                if(dateText.getText().toString().equals("Add date")){
+                    date = null;
+                    time = null;
+                }else{
+                    date = dateText.getText().toString();
+                    time = timeText.getText().toString();
+                }
 
                 reminderItem reminder = new reminderItem(location, radius, title, description, date, time);
 

@@ -89,6 +89,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         writableDatabase.close();
     }
 
+    public void deleteFromTable (int id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM " + TABLE_REMINDERS + " WHERE " + KEY_ID + "='"+ id +"'");
+        db.close();
+    }
+
     public ArrayList<reminderItem> getAllReminders(){
         SQLiteDatabase writableDatabase = this.getWritableDatabase();
         Cursor reminderCursor = writableDatabase.rawQuery(SELECT_ALL, null);

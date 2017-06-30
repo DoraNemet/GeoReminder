@@ -102,11 +102,21 @@ public class reminderItem {
     }
 
     public Double getLat() {
-        return mPinnedLocation.latitude;
+        if(mPinnedLocation != null){
+            return mPinnedLocation.latitude;
+        }
+        else{
+            return 0.0;
+        }
     }
 
     public Double getLong() {
-        return mPinnedLocation.longitude;
+        if(mPinnedLocation != null){
+            return mPinnedLocation.longitude;
+        }
+        else{
+            return 0.0;
+        }
     }
 
     public int getID() {
