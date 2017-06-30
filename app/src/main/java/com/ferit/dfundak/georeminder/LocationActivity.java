@@ -42,7 +42,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
 
     //address
     LatLng pinnedLocation;
-    float radius;
+    double radius;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                radius = Float.parseFloat(radiusInput.getText().toString());
+                radius = Double.parseDouble(radiusInput.getText().toString());
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("KEY_RADIUS", radius);
                 resultIntent.putExtra("KEY_LAT", pinnedLocation.latitude);

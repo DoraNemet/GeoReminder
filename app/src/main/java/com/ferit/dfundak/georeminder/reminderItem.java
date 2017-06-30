@@ -8,18 +8,29 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class reminderItem {
 
+    int mId;
     LatLng mPinnedLocation;
-    float mRadius;
-
+    double mLat;
+    double mLong;
+    double mRadius;
     String mTitle;
     String mDescription;
-
     String mDate;
     String mTime;
 
     public reminderItem(){}
 
-    public reminderItem(LatLng pinnedLocation, float radius, String title, String description, String date, String time) {
+    public reminderItem(LatLng pinnedLocation, double radius, String title, String description, String date, String time) {
+        this.mPinnedLocation = pinnedLocation;
+        this.mRadius = radius;
+        this.mTitle = title;
+        this.mDescription = description;
+        this.mDate = date;
+        this.mTime = time;
+    }
+
+    public reminderItem(int id, LatLng pinnedLocation, double radius, String title, String description, String date, String time) {
+        this.mId = id;
         this.mPinnedLocation = pinnedLocation;
         this.mRadius = radius;
         this.mTitle = title;
@@ -35,7 +46,7 @@ public class reminderItem {
         this.mTime = time;
     }
 
-    public reminderItem(LatLng pinnedLocation, float radius, String title, String description) {
+    public reminderItem(LatLng pinnedLocation, double radius, String title, String description) {
         this.mPinnedLocation = pinnedLocation;
         this.mRadius = radius;
         this.mTitle = title;
@@ -50,7 +61,7 @@ public class reminderItem {
         this.mPinnedLocation = mPinnedLocation;
     }
 
-    public float getRadius() {
+    public double getRadius() {
         return mRadius;
     }
 
@@ -89,4 +100,21 @@ public class reminderItem {
     public void setTime(String mTime) {
         this.mTime = mTime;
     }
+
+    public Double getLat() {
+        return mPinnedLocation.latitude;
+    }
+
+    public Double getLong() {
+        return mPinnedLocation.longitude;
+    }
+
+    public int getID() {
+        return mId;
+    }
+
+    public void setId(int id) {
+        this.mId = id;
+    }
+
 }

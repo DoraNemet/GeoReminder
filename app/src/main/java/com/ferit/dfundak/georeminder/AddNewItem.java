@@ -98,7 +98,7 @@ public class AddNewItem extends AppCompatActivity {
 
     //data to save
     LatLng location;
-    float radius;
+    double radius;
     String title;
     String description;
     String date;
@@ -268,9 +268,11 @@ public class AddNewItem extends AppCompatActivity {
                 date = dateText.getText().toString();
                 time = timeText.getText().toString();
 
-                reminderItem itemToSave = new reminderItem(location, radius, title, description, date, time);
+                reminderItem reminder = new reminderItem(location, radius, title, description, date, time);
 
-                Log.i("dora", itemToSave.getDescription() +" "+itemToSave.getTitle() +" "+itemToSave.getTime() +" "+itemToSave.getDate());
+                DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
+
+                Log.i("dora", reminder.getDescription() +" "+reminder.getTitle() +" "+reminder.getTime() +" "+reminder.getDate());
                 finish();
             }
         });
@@ -405,7 +407,7 @@ public class AddNewItem extends AppCompatActivity {
                     if (data.getExtras() != null) {
                         double lat = data.getExtras().getDouble("KEY_LAT");
                         double lng = data.getExtras().getDouble("KEY_LNG");
-                        radius = data.getExtras().getFloat("KEY_RADIUS");
+                        radius = data.getExtras().getDouble("KEY_RADIUS");
                         Log.i("dora ", lat + " " + lng + "  " + radius);
                         location = new LatLng(lat, lng);
                         setLocationAddress(location);
