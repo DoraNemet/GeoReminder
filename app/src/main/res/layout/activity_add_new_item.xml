@@ -18,6 +18,7 @@
             android:text="Title" />
 
         <EditText
+            android:id="@+id/titleET"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="title" />
@@ -32,6 +33,7 @@
             android:weightSum="1">
 
             <EditText
+                android:id="@+id/descriptionET"
                 android:layout_width="272dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.64"
@@ -137,6 +139,7 @@
 
 
         <Button
+            android:id="@+id/ok_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ok" />

@@ -1,0 +1,92 @@
+package com.ferit.dfundak.georeminder;
+
+import com.google.android.gms.maps.model.LatLng;
+
+/**
+ * Created by Dora on 17/06/2017.
+ */
+
+public class reminderItem {
+
+    LatLng mPinnedLocation;
+    float mRadius;
+
+    String mTitle;
+    String mDescription;
+
+    String mDate;
+    String mTime;
+
+    public reminderItem(){}
+
+    public reminderItem(LatLng pinnedLocation, float radius, String title, String description, String date, String time) {
+        this.mPinnedLocation = pinnedLocation;
+        this.mRadius = radius;
+        this.mTitle = title;
+        this.mDescription = description;
+        this.mDate = date;
+        this.mTime = time;
+    }
+
+    public reminderItem(String title, String description, String date, String time) {
+        this.mTitle = title;
+        this.mDescription = description;
+        this.mDate = date;
+        this.mTime = time;
+    }
+
+    public reminderItem(LatLng pinnedLocation, float radius, String title, String description) {
+        this.mPinnedLocation = pinnedLocation;
+        this.mRadius = radius;
+        this.mTitle = title;
+        this.mDescription = description;
+    }
+
+    public LatLng getPinnedLocation() {
+        return mPinnedLocation;
+    }
+
+    public void setPinnedLocation(LatLng mPinnedLocation) {
+        this.mPinnedLocation = mPinnedLocation;
+    }
+
+    public float getRadius() {
+        return mRadius;
+    }
+
+    public void setRadius(float mRadius) {
+        this.mRadius = mRadius;
+    }
+
+    public String getTitle() {
+        return mTitle;
+    }
+
+    public void setTitle(String mTitle) {
+        this.mTitle = mTitle;
+    }
+
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public void setDescription(String mDescription) {
+        this.mDescription = mDescription;
+    }
+
+    public String getDate() {
+        return mDate;
+    }
+
+    public void setDate(String mDate) {
+        this.mDate = mDate;
+    }
+
+    public String getTime() {
+        return mTime;
+    }
+
+    public void setTime(String mTime) {
+        this.mTime = mTime;
+    }
+}

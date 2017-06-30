@@ -29,7 +29,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -62,9 +64,12 @@ public class AddNewItem extends AppCompatActivity {
     private ImageView addAudio;
     private ImageView playAudio;
     private TextView locationAddress;
+    private EditText titleET;
+    private EditText descriptionET;
     private ImageView imageView;
     private static TextView timeText;
     private static TextView dateText;
+    private Button okButton;
 
     //icons
     private ImageView locationIcon;
@@ -91,6 +96,16 @@ public class AddNewItem extends AppCompatActivity {
     private MediaRecorder recorder;
     private String OUTPUT_FILE;
 
+    //data to save
+    LatLng location;
+    float radius;
+    String title;
+    String description;
+    String date;
+    String time;
+
+
+    //time picker fragment
     public static class TimePickerFragment extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
 
@@ -113,6 +128,7 @@ public class AddNewItem extends AppCompatActivity {
         }
     }
 
+    //date picker fragment
     public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
 
@@ -156,6 +172,9 @@ public class AddNewItem extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.image_view);
         timeText = (TextView) findViewById(R.id.time_textView);
         dateText = (TextView) findViewById(R.id.date_textView);
+        okButton = (Button) findViewById(R.id.ok_button);
+        titleET = (EditText) findViewById(R.id.titleET);
+        descriptionET = (EditText) findViewById(R.id.descriptionET);
 
         addLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -228,6 +247,31 @@ public class AddNewItem extends AppCompatActivity {
             public boolean onLongClick(View v) {
                 recordAudio();
                 return true;
+            }
+        });
+
+        okButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*
+                LatLng location;
+                float radius;
+                String title;
+                String description;
+                String date;
+                String time;
+                */
+                //LatLng pinnedLocation, float radius, String title, String description, String date, String time
+
+                title = titleET.getText().toString();
+                description = descriptionET.getText().toString();
+                date = dateText.getText().toString();
+                time = timeText.getText().toString();
+
+                reminderItem itemToSave = new reminderItem(location, radius, title, description, date, time);
+
+                Log.i("dora", itemToSave.getDescription() +" "+itemToSave.getTitle() +" "+itemToSave.getTime() +" "+itemToSave.getDate());
+                finish();
             }
         });
 
@@ -361,9 +405,9 @@ public class AddNewItem extends AppCompatActivity {
                     if (data.getExtras() != null) {
                         double lat = data.getExtras().getDouble("KEY_LAT");
                         double lng = data.getExtras().getDouble("KEY_LNG");
-                        float radius = data.getExtras().getFloat("KEY_RADIUS");
+                        radius = data.getExtras().getFloat("KEY_RADIUS");
                         Log.i("dora ", lat + " " + lng + "  " + radius);
-                        LatLng location = new LatLng(lat, lng);
+                        location = new LatLng(lat, lng);
                         setLocationAddress(location);
                         locationIcon = (ImageView) findViewById(R.id.location_icon);
                         locationIcon.setImageResource(R.drawable.location_green);

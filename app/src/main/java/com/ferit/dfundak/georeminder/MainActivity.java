@@ -8,14 +8,8 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
-
-
     //UI
     private FloatingActionButton addButton;
-
-    //Location
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +20,6 @@ public class MainActivity extends AppCompatActivity {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
 
                 Intent intent = new Intent(MainActivity.this, AddNewItem.class);
                 startActivity(intent);
