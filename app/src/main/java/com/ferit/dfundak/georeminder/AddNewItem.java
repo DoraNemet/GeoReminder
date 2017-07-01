@@ -1,8 +1,10 @@
 package com.ferit.dfundak.georeminder;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,6 +38,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -265,6 +268,9 @@ public class AddNewItem extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                String id = Long.toString(System.currentTimeMillis());
+                id = id.substring(0, id.length() - 3);
+
                 if (titleET.getText() == null){
                     title  = null;
                 } else{
@@ -283,6 +289,7 @@ public class AddNewItem extends AppCompatActivity {
                 }else{
                     date = dateText.getText().toString();
                     time = timeText.getText().toString();
+                    setAlarm(id);
                 }
 
                 if(locationAddress.getText().toString().equals("Add location")){
@@ -292,7 +299,7 @@ public class AddNewItem extends AppCompatActivity {
                 }
                 String audioPath = OUTPUT_FILE;
 
-                reminderItem reminder = new reminderItem(location, radius, title, description, date, time, mCurrentPhotoPath ,address, audioPath);
+                reminderItem reminder = new reminderItem(Integer.parseInt(id), location, radius, title, description, date, time, mCurrentPhotoPath ,address, audioPath);
 
                 DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
 
@@ -303,6 +310,31 @@ public class AddNewItem extends AppCompatActivity {
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
+
+    private void setAlarm(String id) {
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(id), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        long alarmTime = getTime();
+        Log.i("dora", "Time in ms:" + alarmTime);
+
+        AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
+        Toast.makeText(AddNewItem.this, "Reminder set", Toast.LENGTH_SHORT).show();
+
+    }
+
+    private long getTime() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, month);
+        cal.set(Calendar.DAY_OF_MONTH, day);
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, minute);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTimeInMillis();
+        }
 
     public void recordAudio() {
         Log.i("dora", "in record audio");

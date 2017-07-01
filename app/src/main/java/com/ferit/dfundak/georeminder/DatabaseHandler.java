@@ -61,7 +61,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     //SQL statements
     static final String CREATE_TABLE = "CREATE TABLE " + TABLE_REMINDERS + " (" +
-            KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+            KEY_ID + " INTEGER PRIMARY KEY NOT NULL," +
             KEY_TITLE + " TEXT," +
             KEY_DESCRIPTION + " TEXT,"+
             KEY_DATE + " TEXT," +
@@ -80,6 +80,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void insertReminder(reminderItem reminder){
         ContentValues contentValues = new ContentValues();
+        contentValues.put(KEY_ID, reminder.getID());
         contentValues.put(KEY_TITLE, reminder.getTitle());
         contentValues.put(KEY_DESCRIPTION, reminder.getDescription());
         contentValues.put(KEY_DATE, reminder.getDate());

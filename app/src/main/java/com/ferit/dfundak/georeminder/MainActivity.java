@@ -1,5 +1,7 @@
 package com.ferit.dfundak.georeminder;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -7,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -42,10 +45,20 @@ public class MainActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
                 deleteFromTable(reminder.getID());
+                removeAlarm(reminder.getID());
                 refreshDataset();
                 return false;
             }
         });
+    }
+
+    private void removeAlarm(int id) {
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent, 0);
+        AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
+
+        Toast.makeText(this, "Reminder removed", Toast.LENGTH_SHORT).show();
     }
 
     private void refreshDataset() {
