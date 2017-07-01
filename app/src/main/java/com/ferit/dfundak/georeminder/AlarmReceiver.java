@@ -5,9 +5,11 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.RingtoneManager;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
+
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 /**
  * Created by Dora on 01/07/2017.
@@ -18,19 +20,28 @@ public class AlarmReceiver extends BroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent)
     {
-        Toast.makeText(context, "Alarm!", Toast.LENGTH_LONG).show();
+        String title = intent.getStringExtra("title");
+        String description = intent.getStringExtra("description");
 
         Notification notification = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.alarm)
-                .setContentTitle("Title")
-                .setContentText("Text")
                 .setAutoCancel(true)
-                .setVibrate(new long[] { 1000, 1000})
-                .setPriority(Notification.PRIORITY_MAX)
+                .setContentTitle(title)
+                .setContentText(description)
+                .setSmallIcon(R.drawable.alarm)
+                .setVibrate(new long[]{1000,1000})
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .build();
 
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(0, notification);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(0,notification);
+
+        PowerManager powerManagerm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLockl = powerManagerm.newWakeLock(PowerManager.FULL_WAKE_LOCK |PowerManager.ACQUIRE_CAUSES_WAKEUP |PowerManager.ON_AFTER_RELEASE, "My Tag");
+        wakeLockl.acquire(10000);
+        wakeLockl.release();
+
+       /*
+
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         boolean isScreenOn = pm.isScreenOn();
         if(isScreenOn == false)
@@ -40,6 +51,6 @@ public class AlarmReceiver extends BroadcastReceiver
             PowerManager.WakeLock wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyCpuLock");
 
             wl_cpu.acquire(10000);
-        }
+        }*/
     }
 }

@@ -129,6 +129,11 @@ public class AddNewItem extends AppCompatActivity {
         public void onTimeSet(TimePicker view, int hourPicked, int minutePicked) {
             //todo srediti s append
             timeText.setText(hourPicked + ":" + minutePicked);
+            Calendar c = Calendar.getInstance();
+            year = c.get(Calendar.YEAR);
+            month = c.get(Calendar.MONTH);
+            day = c.get(Calendar.DAY_OF_MONTH);
+            dateText.setText(day + "." + (month + 1) + "." + year);
             hour = hourPicked;
             minute = minutePicked;
         }
@@ -303,7 +308,7 @@ public class AddNewItem extends AppCompatActivity {
 
                 DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
 
-                Log.i("dora", reminder.getDescription() +" "+reminder.getTitle() +" "+reminder.getTime() +" "+reminder.getDate());
+                Log.i("dora", "id set" + id);
                 finish();
             }
         });
@@ -313,11 +318,19 @@ public class AddNewItem extends AppCompatActivity {
 
     private void setAlarm(String id) {
         Intent intent = new Intent(this, AlarmReceiver.class);
+        if (title != null){
+            intent.putExtra("title", title);
+        } else{
+            intent.putExtra("title", "GeoReminder");
+        }
+        if (description != null){
+            intent.putExtra("description", description);
+        } else{
+            intent.putExtra("description", "You've set up reminder!");
+        }
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(id), intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         long alarmTime = getTime();
-        Log.i("dora", "Time in ms:" + alarmTime);
-
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
         Toast.makeText(AddNewItem.this, "Reminder set", Toast.LENGTH_SHORT).show();
