@@ -53,6 +53,7 @@ public class ReminderAdapter extends BaseAdapter {
         reminderViewHolder.descriptionTV.setText(reminder.getDescription());
         reminderViewHolder.dateTv.setText(reminder.getTime());
         reminderViewHolder.timeTv.setText(reminder.getDate());
+        reminderViewHolder.addressTV.setText(reminder.getAddress());
 
         if(reminder.getImageName() != null){
             String mCurrentPhotoPath = reminder.getImageName();
@@ -65,16 +66,8 @@ public class ReminderAdapter extends BaseAdapter {
             } catch (FileNotFoundException e) {
 
             }
-            /*MediaScannerConnection.scanFile(AddNewItem.this,
-                    new String[]{imageUri.getPath()}, null,
-                    new MediaScannerConnection.OnScanCompletedListener() {
-                        public void onScanCompleted(String path, Uri uri) {
-                        }
-                    });
-            break;*/
         }
 
-        // za int reminderViewHolder.tvBookPageCount.setText(String.valueOf(book.getPageCount()));
         return convertView;
     }
 

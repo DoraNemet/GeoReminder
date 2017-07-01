@@ -34,6 +34,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_LONG = "longitude";
     private static final String KEY_RADIUS = "radius";
     private static final String KEY_IMAGE_NAME = "imageName";
+    private static final String KEY_ADDRESS = "address";
+    private static final String KEY_AUDIO_NAME = "audioName";
 
     private DatabaseHandler(Context context) {
         super(context.getApplicationContext(), DATABASE_NAME, null, DATABASE_VERSION);
@@ -67,10 +69,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             KEY_LAT + " REAL," +
             KEY_LONG + " REAL,"+
             KEY_RADIUS + " REAL," +
-            KEY_IMAGE_NAME + " TEXT);";
+            KEY_IMAGE_NAME + " TEXT, " +
+            KEY_ADDRESS + " TEXT," +
+            KEY_AUDIO_NAME + " TEXT);";
 
     static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_REMINDERS;
-    static final String SELECT_ALL = "SELECT " + KEY_ID + "," + KEY_TITLE + "," + KEY_DESCRIPTION + ","+ KEY_DATE + "," + KEY_TIME + "," + KEY_LAT + "," + KEY_LONG + ","+ KEY_RADIUS + "," + KEY_IMAGE_NAME +  " FROM " + TABLE_REMINDERS;
+    static final String SELECT_ALL = "SELECT " + KEY_ID + "," + KEY_TITLE + "," + KEY_DESCRIPTION +
+            ","+ KEY_DATE + "," + KEY_TIME + "," + KEY_LAT + "," + KEY_LONG + ","+ KEY_RADIUS + ","
+            + KEY_IMAGE_NAME + ","+ KEY_ADDRESS + "," + KEY_AUDIO_NAME+ " FROM " + TABLE_REMINDERS;
 
     public void insertReminder(reminderItem reminder){
         ContentValues contentValues = new ContentValues();
@@ -82,6 +88,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         contentValues.put(KEY_LONG, reminder.getLong());
         contentValues.put(KEY_RADIUS, reminder.getRadius());
         contentValues.put(KEY_IMAGE_NAME, reminder.getImageName());
+        contentValues.put(KEY_ADDRESS, reminder.getAddress());
+        contentValues.put(KEY_AUDIO_NAME, reminder.getAudioName());
 
         SQLiteDatabase writableDatabase = this.getWritableDatabase();
         long rowInserted = writableDatabase.insert(TABLE_REMINDERS, KEY_ID, contentValues);
@@ -114,8 +122,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 double radius = reminderCursor.getDouble(7);
                 String imageName = reminderCursor.getString(8);
                 LatLng pinnedLocation = new LatLng(lat, lon);
+                String address = reminderCursor.getString(9);
+                String audioName = reminderCursor.getString(10);
                 //LatLng pinnedLocation, float radius, String title, String description, String date, String time)
-                reminders.add(new reminderItem(id, pinnedLocation, radius, title, description, date, time, imageName));
+                reminders.add(new reminderItem(id, pinnedLocation, radius, title, description, date, time, imageName, address, audioName));
 
             }while(reminderCursor.moveToNext());
         }

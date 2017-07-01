@@ -103,6 +103,7 @@ public class AddNewItem extends AppCompatActivity {
     private String description = null;
     private String date = null;
     private String time = null;
+    private String address = null;
 
     //time picker fragment
     public static class TimePickerFragment extends DialogFragment
@@ -273,7 +274,14 @@ public class AddNewItem extends AppCompatActivity {
                     time = timeText.getText().toString();
                 }
 
-                reminderItem reminder = new reminderItem(location, radius, title, description, date, time, mCurrentPhotoPath);
+                if(locationAddress.getText().toString().equals("Add location")){
+                    address = null;
+                }else{
+                    address = locationAddress.getText().toString();
+                }
+                String audioPath = null;
+
+                reminderItem reminder = new reminderItem(location, radius, title, description, date, time, mCurrentPhotoPath ,address, audioPath);
 
                 DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
 
