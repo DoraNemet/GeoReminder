@@ -83,7 +83,7 @@ public class AddNewItem extends AppCompatActivity {
     public static final double KEY_LNG = 0;
     public static final float KEY_RADIUS = 1;
 
-    //
+    //time and date
     private String mCurrentPhotoPath;
     private static int hour = 0;
     private static int minute = 0;
@@ -91,7 +91,7 @@ public class AddNewItem extends AppCompatActivity {
     private static int month;
     private static int year;
 
-    // sound stuff
+    // sound
     private MediaPlayer mediaPlayer;
     private MediaRecorder recorder;
     private String OUTPUT_FILE;
@@ -104,6 +104,9 @@ public class AddNewItem extends AppCompatActivity {
     private String date = null;
     private String time = null;
     private String address = null;
+
+    //other
+    private String requestFrom = null;
 
     //time picker fragment
     public static class TimePickerFragment extends DialogFragment
@@ -160,7 +163,7 @@ public class AddNewItem extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_item);
 
-        OUTPUT_FILE = Environment.getExternalStorageDirectory() + "/audiorecorder.3ppp";
+        OUTPUT_FILE = Environment.getExternalStorageDirectory() + "/GeoReminder_audio" + System.currentTimeMillis() +".3ppp";
 
         addImage = (LinearLayout) findViewById(R.id.add_image);
         addLocation = (LinearLayout) findViewById(R.id.add_location);
@@ -195,6 +198,7 @@ public class AddNewItem extends AppCompatActivity {
                         requestPermission("CAMERA");
                     }
                     if (!checkPermission("STORAGE")) {
+                        requestFrom = "camera";
                         requestPermission("STORAGE");
                     }
                 } else {
@@ -227,8 +231,15 @@ public class AddNewItem extends AppCompatActivity {
         addAudio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!checkPermission("AUDIO")) {
-                    requestPermission("AUDIO");
+
+                if (!checkPermission("AUDIO") || !checkPermission("STORAGE")) {
+                    if (!checkPermission("AUDIO")) {
+                        requestPermission("AUDIO");
+                    }
+                    if (!checkPermission("STORAGE")) {
+                        requestFrom ="audio";
+                        requestPermission("STORAGE");
+                    }
                 } else {
                     recordAudio();
                 }
@@ -279,7 +290,7 @@ public class AddNewItem extends AppCompatActivity {
                 }else{
                     address = locationAddress.getText().toString();
                 }
-                String audioPath = null;
+                String audioPath = OUTPUT_FILE;
 
                 reminderItem reminder = new reminderItem(location, radius, title, description, date, time, mCurrentPhotoPath ,address, audioPath);
 
@@ -328,7 +339,6 @@ public class AddNewItem extends AppCompatActivity {
                         recordButton.setImageResource(R.drawable.microphone_black);
                         stopRecording();
                         popupDialog.dismiss();
-
                         return true;
                 }
                 return false;
@@ -369,7 +379,13 @@ public class AddNewItem extends AppCompatActivity {
 
     private void stopRecording() {
         if(recorder != null){
-            recorder.stop();
+            try{
+                recorder.stop();
+                recorder.reset();
+                recorder.release();
+                recorder = null;
+            }catch(RuntimeException stopException){
+            }
         }
         addAudio.setVisibility(View.GONE);
         playAudio.setVisibility(View.VISIBLE);
@@ -385,6 +401,7 @@ public class AddNewItem extends AppCompatActivity {
         }
 
         recorder = new MediaRecorder();
+        recorder.reset();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
@@ -392,11 +409,12 @@ public class AddNewItem extends AppCompatActivity {
 
         try {
             recorder.prepare();
-        }
-        catch (Exception e){
+            recorder.start();
+        }catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        recorder.start();
     }
 
     private void stopMediaRecorder() {
@@ -548,14 +566,22 @@ public class AddNewItem extends AppCompatActivity {
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         Log.d("dora", "Storage permission granted");
-                        if (checkPermission("CAMERA")) {
-                            try {
-                                takePicture();
-                            } catch (IOException e) {
-                                Log.e("dora", "Can't take picture");
+                        if (requestFrom.equals("camera")){
+                            if (checkPermission("CAMERA")) {
+                                try {
+                                    takePicture();
+                                } catch (IOException e) {
+                                    Log.e("dora", "Can't take picture");
+                                }
+                            } else {
+                                requestPermission("CAMERA");
                             }
-                        } else {
-                            requestPermission("CAMERA");
+                        }else if(requestFrom.equals("audio")){
+                            if (checkPermission("AUDIO")) {
+                                recordAudio();
+                            } else {
+                                requestPermission("AUDIO");
+                            }
                         }
                     } else {
                         Log.d("dora", "Storage permission denyed");
@@ -568,7 +594,12 @@ public class AddNewItem extends AppCompatActivity {
                 if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         Log.d("dora", "Record audio permission granted");
-                        recordAudio();
+                        if (checkPermission("STORAGE")) {
+                            recordAudio();
+                        } else {
+                            requestPermission("STORAGE");
+                        }
+;
                     } else {
                         Log.d("dora", "Record Audio permission denyed");
                         askForPermission("AUDIO");
@@ -701,18 +732,11 @@ public class AddNewItem extends AppCompatActivity {
     }
 
     private File createImageFile() throws IOException {
-        String imageFileName = "GeoReminder_" + System.currentTimeMillis();
+        String imageFileName = "GeoReminder_image" + System.currentTimeMillis();
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Camera");
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopMediaRecorder();
-        stopPlayback();
-        stopMediaPlayer();
-    }
 }

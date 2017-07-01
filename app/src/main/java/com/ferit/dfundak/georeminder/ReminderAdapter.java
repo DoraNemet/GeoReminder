@@ -1,6 +1,7 @@
 package com.ferit.dfundak.georeminder;
 
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +48,7 @@ public class ReminderAdapter extends BaseAdapter {
             reminderViewHolder = (ViewHolder) convertView.getTag();
         }
 
-        reminderItem reminder = this.mReminders.get(position);
+        final reminderItem reminder = this.mReminders.get(position);
 
         reminderViewHolder.titleTV.setText(reminder.getTitle());
         reminderViewHolder.descriptionTV.setText(reminder.getDescription());
@@ -64,8 +65,24 @@ public class ReminderAdapter extends BaseAdapter {
                 InputStream ims = new FileInputStream(file);
                 reminderViewHolder.picture.setImageBitmap(BitmapFactory.decodeStream(ims));
             } catch (FileNotFoundException e) {
-
             }
+        }
+
+        if(reminder.getAudioName() != null){
+            reminderViewHolder.playButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+                    try {
+                        mediaPlayer.setDataSource(reminder.getAudioName());
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
 
         return convertView;
@@ -78,7 +95,7 @@ public class ReminderAdapter extends BaseAdapter {
 
     public static class ViewHolder {
         public TextView titleTV, descriptionTV, timeTv, dateTv, addressTV;
-        public ImageView picture;
+        public ImageView picture, playButton;
 
         public ViewHolder(View bookView) {
             titleTV = (TextView) bookView.findViewById(R.id.title);
@@ -87,6 +104,7 @@ public class ReminderAdapter extends BaseAdapter {
             dateTv = (TextView) bookView.findViewById(R.id.date);
             addressTV = (TextView) bookView.findViewById(R.id.address);
             picture = (ImageView) bookView.findViewById(R.id.picture);
+            playButton = (ImageView) bookView.findViewById(R.id.play_button);
         }
     }
 }

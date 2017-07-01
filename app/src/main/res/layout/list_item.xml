@@ -63,7 +63,7 @@
                 <TextView
                     android:id="@+id/address"
                     style="@style/TextViewDescription"
-                    tools:text="Adress" />
+                    tools:text="Address" />
 
             </LinearLayout>
         </RelativeLayout>
