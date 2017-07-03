@@ -23,18 +23,6 @@ public class reminderItem {
 
     public reminderItem(){}
 
-    public reminderItem(LatLng pinnedLocation, double radius, String title, String description, String date, String time, String imageName, String address, String audioName) {
-        this.mPinnedLocation = pinnedLocation;
-        this.mRadius = radius;
-        this.mTitle = title;
-        this.mDescription = description;
-        this.mDate = date;
-        this.mTime = time;
-        this.mImageName = imageName;
-        this.mAddress = address;
-        this.mAudioName = audioName;
-    }
-
     public reminderItem(int id, LatLng pinnedLocation, double radius, String title, String description, String date, String time, String imageName, String address, String audioName) {
         this.mId = id;
         this.mPinnedLocation = pinnedLocation;

@@ -40,17 +40,5 @@ public class AlarmReceiver extends BroadcastReceiver
         wakeLockl.acquire(10000);
         wakeLockl.release();
 
-       /*
-
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        boolean isScreenOn = pm.isScreenOn();
-        if(isScreenOn == false)
-        {
-            PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK |PowerManager.ACQUIRE_CAUSES_WAKEUP |PowerManager.ON_AFTER_RELEASE,"MyLock");
-            wl.acquire(10000);
-            PowerManager.WakeLock wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"MyCpuLock");
-
-            wl_cpu.acquire(10000);
-        }*/
     }
 }
