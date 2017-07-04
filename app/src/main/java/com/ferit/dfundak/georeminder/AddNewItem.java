@@ -115,6 +115,8 @@ public class AddNewItem extends AppCompatActivity {
 
     //other
     private String requestFrom = null;
+    private String STATE = null;
+    private int receivedID;
 
     //time picker fragment
     public static class TimePickerFragment extends DialogFragment
@@ -176,8 +178,6 @@ public class AddNewItem extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new_item);
 
-        OUTPUT_FILE = Environment.getExternalStorageDirectory() + "/GeoReminder_audio" + System.currentTimeMillis() +".3ppp";
-
         addImage = (LinearLayout) findViewById(R.id.add_image);
         addLocation = (LinearLayout) findViewById(R.id.add_location);
         addTime = (LinearLayout) findViewById(R.id.add_time);
@@ -193,6 +193,15 @@ public class AddNewItem extends AppCompatActivity {
         cancelButton = (Button) findViewById(R.id.cancel_button);
         titleET = (EditText) findViewById(R.id.titleET);
         descriptionET = (EditText) findViewById(R.id.descriptionET);
+
+        receivedID = getIntent().getExtras().getInt("ID", 0);
+        if(receivedID != 0){
+            setupData(receivedID);
+            STATE = "EDIT";
+        }
+        else{
+            OUTPUT_FILE = Environment.getExternalStorageDirectory() + "/GeoReminder_audio" + System.currentTimeMillis() +".3ppp";
+        }
 
         addLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -318,10 +327,15 @@ public class AddNewItem extends AppCompatActivity {
 
                 reminderItem reminder = new reminderItem(Integer.parseInt(id), location, radius, title, description, date, time, mCurrentPhotoPath ,address, audioPath);
 
-                DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
+                if(STATE == "EDIT"){
+                    updateDatabes(reminder, receivedID);
 
-                Log.i("dora", "id set" + id);
+                }
+                else{
+                    DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
 
+                    Log.i("dora", "id set" + id);
+                }
                 SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
                 editor.putBoolean("fromNotification", false);
                 editor.commit();
@@ -338,6 +352,71 @@ public class AddNewItem extends AppCompatActivity {
         });
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+    }
+
+    private void setupData(int receivedID) {
+
+        final reminderItem reminder = selectFromTableMet(receivedID);
+
+        if(!reminder.getTitle().isEmpty()){
+            titleET.setText(reminder.getTitle());
+        }
+        if(!reminder.getDescription().isEmpty()){
+            descriptionET.setText(reminder.getDescription());
+        }
+        if(!reminder.getDate().isEmpty()){
+            dateText.setText(reminder.getDate());
+        }
+        if(!reminder.getTime().isEmpty()){
+            timeText.setText(reminder.getTime());
+        }
+        if(!reminder.getAddress().isEmpty()){
+            locationAddress.setText(reminder.getAddress());
+        }
+        if(reminder.getRadius()!= 0){
+            radiusTextView.setText(Double.toString(reminder.getRadius()));
+        }
+        if(reminder.getImageName() != null){
+            String mCurrentPhotoPath = reminder.getImageName();
+            Uri imageUri = Uri.parse(mCurrentPhotoPath);
+            File file = new File(imageUri.getPath());
+            try {
+                //show image in ImageView
+                InputStream ims = new FileInputStream(file);
+                imageView.setImageBitmap(BitmapFactory.decodeStream(ims));
+            } catch (FileNotFoundException e) {
+            }
+        }
+
+        if(reminder.getAudioName() != null){
+            addAudio.setVisibility(View.GONE);
+            playAudio.setVisibility(View.VISIBLE);
+
+            playAudio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+                    try {
+                        mediaPlayer.setDataSource(reminder.getAudioName());
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+    }
+
+    private reminderItem selectFromTableMet(int receivedID) {
+        return DatabaseHandler.getInstance(this).selectFromTable(receivedID);
+    }
+
+
+    private void updateDatabes(reminderItem reminder, int receivedID) {
+        DatabaseHandler.getInstance(this).updateReminder(reminder, receivedID);
     }
 
     private void setAlarm(String id) {

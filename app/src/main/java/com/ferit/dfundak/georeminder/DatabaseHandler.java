@@ -74,6 +74,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             KEY_AUDIO_NAME + " TEXT);";
 
     static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_REMINDERS;
+
     static final String SELECT_ALL = "SELECT " + KEY_ID + "," + KEY_TITLE + "," + KEY_DESCRIPTION +
             ","+ KEY_DATE + "," + KEY_TIME + "," + KEY_LAT + "," + KEY_LONG + ","+ KEY_RADIUS + ","
             + KEY_IMAGE_NAME + ","+ KEY_ADDRESS + "," + KEY_AUDIO_NAME+ " FROM " + TABLE_REMINDERS;
@@ -101,10 +102,66 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         writableDatabase.close();
     }
 
+    public void updateReminder(reminderItem reminder, int idSelected){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(KEY_ID, idSelected);
+        contentValues.put(KEY_TITLE, reminder.getTitle());
+        contentValues.put(KEY_DESCRIPTION, reminder.getDescription());
+        contentValues.put(KEY_DATE, reminder.getDate());
+        contentValues.put(KEY_TIME, reminder.getTime());
+        contentValues.put(KEY_LAT, reminder.getLat());
+        contentValues.put(KEY_LONG, reminder.getLong());
+        contentValues.put(KEY_RADIUS, reminder.getRadius());
+        contentValues.put(KEY_IMAGE_NAME, reminder.getImageName());
+        contentValues.put(KEY_ADDRESS, reminder.getAddress());
+        contentValues.put(KEY_AUDIO_NAME, reminder.getAudioName());
+
+        SQLiteDatabase writableDatabase = this.getWritableDatabase();
+        long rowUpdated = writableDatabase.update(TABLE_REMINDERS, contentValues, KEY_ID + "="+ idSelected, null);
+
+        if(rowUpdated != -1)
+            Log.i("dora", "row updated" + rowUpdated);
+        else
+            Log.i("dora", "SMTH WENT WRONG" + rowUpdated);
+        writableDatabase.close();
+    }
+
     public void deleteFromTable (int id){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DELETE FROM " + TABLE_REMINDERS + " WHERE " + KEY_ID + "='"+ id +"'");
         db.close();
+    }
+
+    public reminderItem selectFromTable (int idSelected){
+        SQLiteDatabase db = this.getWritableDatabase();
+        String SELECT_ID = ("SELECT * FROM " + TABLE_REMINDERS + " WHERE " + KEY_ID + "='"+ idSelected +"'");
+
+        Cursor reminderCursor = db.rawQuery(SELECT_ID, null);
+        reminderItem reminder = new reminderItem();
+        if(reminderCursor.moveToFirst()){
+            do{
+                int id = reminderCursor.getInt(0);
+                String title = reminderCursor.getString(1);
+                String description = reminderCursor.getString(2);
+                String date = reminderCursor.getString(3);
+                String time = reminderCursor.getString(4);
+                double lat = reminderCursor.getDouble(5);
+                double lon = reminderCursor.getDouble(6);
+                double radius = reminderCursor.getDouble(7);
+                String imageName = reminderCursor.getString(8);
+                LatLng pinnedLocation = new LatLng(lat, lon);
+                String address = reminderCursor.getString(9);
+                String audioName = reminderCursor.getString(10);
+                if(lat == 0.0 && lon == 0.0){
+                    pinnedLocation = null;
+                }
+                reminder = new reminderItem(id, pinnedLocation, radius, title, description, date, time, imageName, address, audioName);
+
+            }while(reminderCursor.moveToNext());
+        }
+        reminderCursor.close();
+        db.close();
+        return reminder;
     }
 
     public ArrayList<reminderItem> getAllReminders(){

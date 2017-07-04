@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(MainActivity.this, AddNewItem.class);
+                    intent.putExtra("ID", 0);
                     startActivity(intent);
             }
             });
@@ -96,6 +97,17 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                     removeAlarm(reminder.getID());
                     refreshDataset();
                     return false;
+                }
+            });
+
+            reminderList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
+                    Intent intent = new Intent(MainActivity.this, AddNewItem.class);
+                    intent.putExtra("ID", reminder.getID());
+                    removeAlarm(reminder.getID());
+                    startActivity(intent);
                 }
             });
 
