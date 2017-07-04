@@ -65,12 +65,12 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        super.onCreate(savedInstanceState);
         //check if it is running in background
+
         SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
         Boolean fromNotification = prefs.getBoolean("fromNotification", false);
         if (fromNotification == false) {
-            super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
 
             addButton = (FloatingActionButton) findViewById(R.id.add_button);
@@ -107,6 +107,9 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             mGeofencePendingIntent = null;
             mGeofencingClient = LocationServices.getGeofencingClient(this);
         }
+        SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putBoolean("fromNotification", false);
+        editor.commit();
     }
 
     private void removeAlarm(int id) {
@@ -144,7 +147,11 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             } else {
                 populateGeofenceList();
                 startGeoFences();
-                startTracking();
+                if(!mGeofenceList.isEmpty()){
+                    startTracking();
+                }else{
+                    stopTracking();
+                }
             }
             refreshDataset();
         }
@@ -301,7 +308,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                  mRadius = 50;
              }
 
-             Log.i("dora", "add geofence " + mId + " " + mRadius + " " + mDate + " " + mTime);
              long expirationInMilliseconds;
 
              if(mDate == null || mTime == null){
@@ -314,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
              if(mPinnedLocation == null){
                  continue;
              } else{
+                 Log.i("dora", "add geofence " + mId + " " + mRadius + " ||" + mPinnedLocation.latitude + " " + mPinnedLocation.longitude + "|| " + mDate + " " + mTime);
                  mGeofenceList.add(new Geofence.Builder()
                          .setRequestId(Integer.toString(mId))
                          .setCircularRegion(

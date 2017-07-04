@@ -43,7 +43,11 @@
             android:inputType="numberDecimal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="1 m" />
+            android:hint="20" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" m" />
 
     </LinearLayout>
 
@@ -55,6 +59,13 @@
         android:layout_alignTop="@+id/radius_layout"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+    <Button
+        android:layout_below="@+id/ok_button"
+        android:layout_alignParentRight="true"
+        android:id="@+id/cancel_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="cancle" />
 
 
 </RelativeLayout>

@@ -38,6 +38,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
     //UI
     private TextView addressTextView;
     private Button okButton;
+    private Button cancelButton;
     private EditText radiusInput;
 
     //address
@@ -50,20 +51,35 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         setContentView(R.layout.activity_location);
         this.addressTextView = (TextView) findViewById(R.id.address);
         this.okButton = (Button) findViewById(R.id.ok_button);
+        this.cancelButton = (Button) findViewById(R.id.cancel_button);
         this.radiusInput = (EditText) findViewById(R.id.radius_input);
-        radiusInput.setText("1");
+        //radiusInput.setText("20");
 
         this.initialize();
 
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                radius = Double.parseDouble(radiusInput.getText().toString());
+
+                String radiusBox = radiusInput.getText().toString();
+                if(radiusBox.isEmpty()){
+                    radius = 20;
+                }else{
+                    radius = Double.parseDouble(radiusBox);
+                }
+
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("KEY_RADIUS", radius);
                 resultIntent.putExtra("KEY_LAT", pinnedLocation.latitude);
                 resultIntent.putExtra("KEY_LNG", pinnedLocation.longitude);
                 setResult(RESULT_OK, resultIntent);
+                finish();
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 finish();
             }
         });

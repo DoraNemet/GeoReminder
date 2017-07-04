@@ -70,6 +70,7 @@ public class AddNewItem extends AppCompatActivity {
     private ImageView addAudio;
     private ImageView playAudio;
     private TextView locationAddress;
+    private TextView radiusTextView;
     private EditText titleET;
     private EditText descriptionET;
     private ImageView imageView;
@@ -184,6 +185,7 @@ public class AddNewItem extends AppCompatActivity {
         addAudio = (ImageView) findViewById(R.id.add_audio);
         playAudio = (ImageView) findViewById(R.id.play_audio);
         locationAddress = (TextView) findViewById(R.id.location_textView);
+        radiusTextView = (TextView) findViewById(R.id.radius_textView);
         imageView = (ImageView) findViewById(R.id.image_view);
         timeText = (TextView) findViewById(R.id.time_textView);
         dateText = (TextView) findViewById(R.id.date_textView);
@@ -304,10 +306,15 @@ public class AddNewItem extends AppCompatActivity {
 
                 if(locationAddress.getText().toString().equals("Add location")){
                     address = null;
+                    location = null;
                 }else{
                     address = locationAddress.getText().toString();
                 }
                 String audioPath = OUTPUT_FILE;
+
+                if(radius == 0){
+                    radius = 20;
+                }
 
                 reminderItem reminder = new reminderItem(Integer.parseInt(id), location, radius, title, description, date, time, mCurrentPhotoPath ,address, audioPath);
 
@@ -506,6 +513,7 @@ public class AddNewItem extends AppCompatActivity {
                         setLocationAddress(location);
                         locationIcon = (ImageView) findViewById(R.id.location_icon);
                         locationIcon.setImageResource(R.drawable.location_green);
+                        radiusTextView.setText(" " + Double.toString(radius) + "m");
                     } else Log.i("dora", "fail");
                     break;
                 }

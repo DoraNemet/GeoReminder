@@ -125,6 +125,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 LatLng pinnedLocation = new LatLng(lat, lon);
                 String address = reminderCursor.getString(9);
                 String audioName = reminderCursor.getString(10);
+                if(lat == 0.0 && lon == 0.0){
+                    pinnedLocation = null;
+                }
                 reminders.add(new reminderItem(id, pinnedLocation, radius, title, description, date, time, imageName, address, audioName));
 
             }while(reminderCursor.moveToNext());

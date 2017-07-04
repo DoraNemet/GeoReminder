@@ -64,10 +64,23 @@
                 android:layout_height="48dp"
                 android:src="@drawable/location_black" />
 
-            <TextView
-                android:id="@+id/location_textView"
-                style="@style/TextViewDescription"
-                android:text="Add Location" />
+            <LinearLayout
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/location_textView"
+                    style="@style/TextViewDescription"
+                    android:text="Add Location" />
+
+                <TextView
+                    android:id="@+id/radius_textView"
+                    style="@style/TextViewDescription"
+                    tools:text="20 m"/>
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout style="@style/LinearLayoutAdd">
