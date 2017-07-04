@@ -5,6 +5,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -60,51 +61,52 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
     //variables
     ArrayList<reminderItem> reminders;
+    public static final String MY_PREFS_NAME = "MyPrefsFile";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        addButton = (FloatingActionButton) findViewById(R.id.add_button);
-        reminderList = (ListView) this.findViewById(R.id.remindersLV);
+        //check if it is running in background
+        SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+        Boolean fromNotification = prefs.getBoolean("fromNotification", false);
+        if (fromNotification == false) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
 
-        reminders = this.loadReminders();
-        ReminderAdapter reminderAdapter = new ReminderAdapter(reminders);
-        this.reminderList.setAdapter(reminderAdapter);
+            addButton = (FloatingActionButton) findViewById(R.id.add_button);
+            reminderList = (ListView) this.findViewById(R.id.remindersLV);
 
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddNewItem.class);
-                startActivity(intent);
-        }
-        });
+            reminders = this.loadReminders();
+            ReminderAdapter reminderAdapter = new ReminderAdapter(reminders);
+            this.reminderList.setAdapter(reminderAdapter);
 
-        reminderList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
-                deleteFromTable(reminder.getID());
-                removeAlarm(reminder.getID());
-                refreshDataset();
-                return false;
+            addButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(MainActivity.this, AddNewItem.class);
+                    startActivity(intent);
             }
-        });
+            });
 
-        this.mLocationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-        this.mLocationListener = new SimpleLocationListener();
+            reminderList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
+                    deleteFromTable(reminder.getID());
+                    removeAlarm(reminder.getID());
+                    refreshDataset();
+                    return false;
+                }
+            });
 
-        //geofence
-        mGeofenceList = new ArrayList<>();
-        mGeofencePendingIntent = null;
-        populateGeofenceList();
+            this.mLocationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
+            this.mLocationListener = new SimpleLocationListener();
 
-        mGeofencingClient = LocationServices.getGeofencingClient(this);
-        if(!mGeofenceList.isEmpty()){
-            startGeoFences();
+            //geofence
+            mGeofenceList = new ArrayList<>();
+            mGeofencePendingIntent = null;
+            mGeofencingClient = LocationServices.getGeofencingClient(this);
         }
-
     }
 
     private void removeAlarm(int id) {
@@ -134,34 +136,39 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     @Override
     protected void onStart() {
         super.onStart();
-        if (!checkPermissions()) {
-            requestPermissions();
-        } else {
-            populateGeofenceList();
-            startGeoFences();
-            startTracking();
+        SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+        Boolean fromNotification = prefs.getBoolean("fromNotification", false);
+        if (fromNotification == false){
+            if (!checkPermissions()) {
+                requestPermissions();
+            } else {
+                populateGeofenceList();
+                startGeoFences();
+                startTracking();
+            }
+            refreshDataset();
         }
-        refreshDataset();
     }
-/*
-    @Override
-    protected void onResume() {
-
-       super.onResume();
-        if (!checkPermissions()) {
-            requestPermissions();
-        } else {
-            populateGeofenceList();
-            startGeoFences();
-            startTracking();
-        }
-        refreshDataset();
-
-    }*/
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putBoolean("fromNotification", false);
+        editor.commit();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putBoolean("fromNotification", false);
+        editor.commit();
         stopTracking();
     }
 

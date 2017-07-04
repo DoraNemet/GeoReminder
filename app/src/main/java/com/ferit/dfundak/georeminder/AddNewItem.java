@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.location.Address;
@@ -50,6 +51,8 @@ import java.io.InputStream;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+
+import static com.ferit.dfundak.georeminder.MainActivity.MY_PREFS_NAME;
 
 public class AddNewItem extends AppCompatActivity {
 
@@ -311,6 +314,11 @@ public class AddNewItem extends AppCompatActivity {
                 DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
 
                 Log.i("dora", "id set" + id);
+
+                SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+                editor.putBoolean("fromNotification", false);
+                editor.commit();
+
                 finish();
             }
         });
