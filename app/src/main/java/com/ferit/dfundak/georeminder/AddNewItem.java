@@ -319,7 +319,11 @@ public class AddNewItem extends AppCompatActivity {
                 }else{
                     address = locationAddress.getText().toString();
                 }
-                String audioPath = OUTPUT_FILE;
+
+                String audioPath = null;
+                if(mediaPlayer != null){
+                    audioPath = OUTPUT_FILE;
+                }
 
                 if(radius == 0){
                     radius = 20;
@@ -406,6 +410,8 @@ public class AddNewItem extends AppCompatActivity {
                     }
                 }
             });
+        }else{
+            OUTPUT_FILE = Environment.getExternalStorageDirectory() + "/GeoReminder_audio" + System.currentTimeMillis() +".3ppp";
         }
 
     }
