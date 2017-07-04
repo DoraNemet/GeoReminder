@@ -73,6 +73,7 @@ public class AddNewItem extends AppCompatActivity {
     private static TextView timeText;
     private static TextView dateText;
     private Button okButton;
+    private Button cancelButton;
 
     //icons
     private ImageView locationIcon;
@@ -184,6 +185,7 @@ public class AddNewItem extends AppCompatActivity {
         timeText = (TextView) findViewById(R.id.time_textView);
         dateText = (TextView) findViewById(R.id.date_textView);
         okButton = (Button) findViewById(R.id.ok_button);
+        cancelButton = (Button) findViewById(R.id.cancel_button);
         titleET = (EditText) findViewById(R.id.titleET);
         descriptionET = (EditText) findViewById(R.id.descriptionET);
 
@@ -309,6 +311,13 @@ public class AddNewItem extends AppCompatActivity {
                 DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
 
                 Log.i("dora", "id set" + id);
+                finish();
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 finish();
             }
         });

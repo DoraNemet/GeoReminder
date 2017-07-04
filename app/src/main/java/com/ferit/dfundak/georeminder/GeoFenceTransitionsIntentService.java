@@ -68,8 +68,11 @@ public class GeoFenceTransitionsIntentService extends IntentService {
 
         ArrayList<String> triggeringGeofencesIdsList = new ArrayList<>();
 
+        int j = 0;
         for (Geofence geofence : triggeringGeofences) {
             triggeringGeofencesIdsList.add(geofence.getRequestId());
+            Log.i("dora", "triggering " + triggeringGeofencesIdsList.get(j));
+            j++;
         }
 
         String triggeringGeofencesIdsString = "";
@@ -80,13 +83,15 @@ public class GeoFenceTransitionsIntentService extends IntentService {
             String mDescription = reminders.get(i).getDescription();
             String mTitle = reminders.get(i).getTitle();
 
-            Log.i("dora", "service" + mId + " " + mDescription + " " + mTitle);
-
             if(triggeringGeofencesIdsList.contains(Integer.toString(mId))){
+                Log.i("dora", "activated " + mId + " " + mDescription + " " + mTitle);
                 Log.i("dora", "triggeringGeofencesIdsString: " + triggeringGeofencesIdsString );
                // triggeringGeofencesIdsList.add(mDescription);
                 triggeringGeofencesIdsString += mTitle + " ";
-            }
+            }/*else{
+                triggeringGeofencesIdsString += triggeringGeofencesIdsList.get(0);
+                Log.i("dora", "else triggeringGeofencesIdsString: " + triggeringGeofencesIdsString );
+            }*/
         }
 
         return geofenceTransitionString + ": " + triggeringGeofencesIdsString;

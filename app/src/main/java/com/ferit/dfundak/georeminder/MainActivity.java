@@ -29,6 +29,8 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
@@ -96,7 +98,12 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         //geofence
         mGeofenceList = new ArrayList<>();
         mGeofencePendingIntent = null;
+        populateGeofenceList();
+
         mGeofencingClient = LocationServices.getGeofencingClient(this);
+        if(!mGeofenceList.isEmpty()){
+            startGeoFences();
+        }
 
     }
 
@@ -108,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         alarmManager.cancel(pendingIntent);
         removeGeofences();
         Toast.makeText(this, "Reminder removed", Toast.LENGTH_SHORT).show();
-        populateGeofenceList();
     }
 
     private void refreshDataset() {
@@ -137,10 +143,11 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         }
         refreshDataset();
     }
-
+/*
     @Override
     protected void onResume() {
-        super.onResume();
+
+       super.onResume();
         if (!checkPermissions()) {
             requestPermissions();
         } else {
@@ -149,7 +156,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             startTracking();
         }
         refreshDataset();
-    }
+
+    }*/
 
     @Override
     protected void onStop() {
@@ -184,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         }
     }
 
+    //tracking location
     private void startTracking() {
         Log.d("dora", "Tracking started.");
         Criteria criteria = new Criteria();
@@ -210,13 +219,24 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
     //remove geofence
     public void removeGeofences() {
-        /*if (!checkPermissions()) {
-            mPendingGeofenceTask = PendingGeofenceTask.REMOVE;
-            requestPermissions();
-        }
-        */
         Log.i("dora", "REMOVING");
-        mGeofencingClient.removeGeofences(getGeofencePendingIntent()).addOnCompleteListener(this);
+
+        mGeofencingClient.removeGeofences(getGeofencePendingIntent())
+                .addOnSuccessListener(this, new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        mGeofenceList.clear();
+                        Log.i("dora", "REMOVED");
+                        populateGeofenceList();
+                        startGeoFences();
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i("dora", "FAILED TO REMOVE");
+                    }
+                });
     }
 
     //on add/remove show toast
@@ -224,16 +244,26 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     public void onComplete(@NonNull Task<Void> task) {
         mPendingGeofenceTask = PendingGeofenceTask.NONE;
         if (task.isSuccessful()) {
+            updateGeofencesAdded(!getGeofencesAdded());
+
+            int messageId = getGeofencesAdded() ? R.string.geofences_added :
+                    R.string.geofences_removed;
+
+            Toast.makeText(this, getString(messageId), Toast.LENGTH_SHORT).show();
             PreferenceManager.getDefaultSharedPreferences(this)
                     .edit()
                     .putBoolean(Constants.GEOFENCES_ADDED_KEY, !getGeofencesAdded())
                     .apply();
-
-            int messageId = getGeofencesAdded() ? R.string.geofences_added : R.string.geofences_removed;
-            //Toast.makeText(this, getString(messageId), Toast.LENGTH_SHORT).show();
         } else {
             Log.w("dora", "error");
         }
+    }
+
+    private void updateGeofencesAdded(boolean added) {
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putBoolean(Constants.GEOFENCES_ADDED_KEY, added)
+                .apply();
     }
 
     private boolean getGeofencesAdded() {
@@ -261,10 +291,10 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
              String mTime = reminders.get(i).getTime();
 
              if(mRadius == 0){
-                 mRadius = 100;
+                 mRadius = 50;
              }
 
-             Log.i("dora", "add geofence" + mId + " " + mRadius + " " + mDate + " " + mTime);
+             Log.i("dora", "add geofence " + mId + " " + mRadius + " " + mDate + " " + mTime);
              long expirationInMilliseconds;
 
              if(mDate == null || mTime == null){
@@ -289,22 +319,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                          .build());
              }
          }
-
-        /*
-        for (Map.Entry<String, LatLng> entry : Constants.LANDMARKS.entrySet()) {
-
-
-            mGeofenceList.add(new Geofence.Builder()
-                    .setRequestId(entry.getKey())
-                    .setCircularRegion(
-                            entry.getValue().latitude,
-                            entry.getValue().longitude,
-                            Constants.GEOFENCE_RADIUS_IN_METERS
-                    )
-                    .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .build());
-        }*/
     }
 
     private long getTimeInMs(String date, String time) {
@@ -328,9 +342,9 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         if (mPendingGeofenceTask == PendingGeofenceTask.ADD) {
             addGeofences();
         }
-        /*else if (mPendingGeofenceTask == PendingGeofenceTask.REMOVE) {
+        else if (mPendingGeofenceTask == PendingGeofenceTask.REMOVE) {
             removeGeofences();
-        }*/
+        }
     }
 
     private boolean checkPermissions() {
