@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     //variables
     ArrayList<reminderItem> reminders;
     public static final String MY_PREFS_NAME = "MyPrefsFile";
+    private boolean fromApp = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                     reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
                     Intent intent = new Intent(MainActivity.this, AddNewItem.class);
                     intent.putExtra("ID", reminder.getID());
+                    fromApp = false;
                     removeAlarm(reminder.getID());
                     startActivity(intent);
                 }
@@ -153,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         super.onStart();
         SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
         Boolean fromNotification = prefs.getBoolean("fromNotification", false);
+        mGeofenceList = new ArrayList<>();
         if (fromNotification == false){
             if (!checkPermissions()) {
                 requestPermissions();
@@ -253,8 +256,13 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                     public void onSuccess(Void aVoid) {
                         mGeofenceList.clear();
                         Log.i("dora", "REMOVED");
-                        populateGeofenceList();
-                        startGeoFences();
+
+                        if(fromApp){
+                            populateGeofenceList();
+                            startGeoFences();
+                        }else{
+                            fromApp = true;
+                        }
                     }
                 })
                 .addOnFailureListener(this, new OnFailureListener() {

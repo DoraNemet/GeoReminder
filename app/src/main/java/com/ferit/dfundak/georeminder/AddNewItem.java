@@ -10,7 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.media.MediaPlayer;
@@ -42,12 +41,10 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -92,12 +89,14 @@ public class AddNewItem extends AppCompatActivity {
     public static final float KEY_RADIUS = 1;
 
     //time and date
-    private String mCurrentPhotoPath;
     private static int hour = 0;
     private static int minute = 0;
     private static int day = 0;
     private static int month;
     private static int year;
+
+    //image
+    private String mCurrentPhotoPath;
 
     // sound
     private MediaPlayer mediaPlayer;
@@ -171,7 +170,6 @@ public class AddNewItem extends AppCompatActivity {
             year = yearPicked;
         }
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -255,7 +253,6 @@ public class AddNewItem extends AppCompatActivity {
         addAudio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (!checkPermission("AUDIO") || !checkPermission("STORAGE")) {
                     if (!checkPermission("AUDIO")) {
                         requestPermission("AUDIO");
@@ -288,7 +285,6 @@ public class AddNewItem extends AppCompatActivity {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 String id = Long.toString(System.currentTimeMillis());
                 id = id.substring(0, id.length() - 3);
 
@@ -325,7 +321,7 @@ public class AddNewItem extends AppCompatActivity {
                     audioPath = OUTPUT_FILE;
                 }
 
-                if(radius == 0){
+                if(radius == 0 && address != null){
                     radius = 20;
                 }
 
@@ -358,44 +354,40 @@ public class AddNewItem extends AppCompatActivity {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
+    //if there is data to be edited, load it
     private void setupData(int receivedID) {
-
         final reminderItem reminder = selectFromTableMet(receivedID);
 
-        if(!reminder.getTitle().isEmpty()){
+        if(reminder.getTitle()!= null){
             titleET.setText(reminder.getTitle());
         }
-        if(!reminder.getDescription().isEmpty()){
+        if(reminder.getDescription()!= null){
             descriptionET.setText(reminder.getDescription());
         }
-        if(!reminder.getDate().isEmpty()){
+        if(reminder.getDate()!= null){
             dateText.setText(reminder.getDate());
         }
-        if(!reminder.getTime().isEmpty()){
+        if(reminder.getTime()!= null){
             timeText.setText(reminder.getTime());
         }
-        if(!reminder.getAddress().isEmpty()){
+        if(reminder.getAddress()!= null){
             locationAddress.setText(reminder.getAddress());
         }
         if(reminder.getRadius()!= 0){
             radiusTextView.setText(Double.toString(reminder.getRadius()));
         }
         if(reminder.getImageName() != null){
-            String mCurrentPhotoPath = reminder.getImageName();
-            Uri imageUri = Uri.parse(mCurrentPhotoPath);
+            mCurrentPhotoPath = reminder.getImageName();
+            String photoPath = reminder.getImageName();
+            Log.i("dora", "photo path" + photoPath);
+            Uri imageUri = Uri.parse(photoPath);
             File file = new File(imageUri.getPath());
-            try {
-                //show image in ImageView
-                InputStream ims = new FileInputStream(file);
-                imageView.setImageBitmap(BitmapFactory.decodeStream(ims));
-            } catch (FileNotFoundException e) {
-            }
+            Picasso.with(this).load(file).rotate(90f).into(imageView);
         }
 
         if(reminder.getAudioName() != null){
             addAudio.setVisibility(View.GONE);
             playAudio.setVisibility(View.VISIBLE);
-
             playAudio.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -413,13 +405,11 @@ public class AddNewItem extends AppCompatActivity {
         }else{
             OUTPUT_FILE = Environment.getExternalStorageDirectory() + "/GeoReminder_audio" + System.currentTimeMillis() +".3ppp";
         }
-
     }
 
     private reminderItem selectFromTableMet(int receivedID) {
         return DatabaseHandler.getInstance(this).selectFromTable(receivedID);
     }
-
 
     private void updateDatabes(reminderItem reminder, int receivedID) {
         DatabaseHandler.getInstance(this).updateReminder(reminder, receivedID);
@@ -606,15 +596,11 @@ public class AddNewItem extends AppCompatActivity {
                 if (resultCode == RESULT_OK) {
                     Uri imageUri = Uri.parse(mCurrentPhotoPath);
                     File file = new File(imageUri.getPath());
-                    try {
                         //show image in ImageView
-                        InputStream ims = new FileInputStream(file);
-                        imageView.setImageBitmap(BitmapFactory.decodeStream(ims));
-                        cameraIcon = (ImageView) findViewById(R.id.camera_icon);
-                        cameraIcon.setImageResource(R.drawable.picture_green);
-                    } catch (FileNotFoundException e) {
-                        return;
-                    }
+                    Picasso.with(this).load(file).rotate(90f).into(imageView);
+                    cameraIcon = (ImageView) findViewById(R.id.camera_icon);
+                    cameraIcon.setImageResource(R.drawable.picture_green);
+
                     MediaScannerConnection.scanFile(AddNewItem.this,
                             new String[]{imageUri.getPath()}, null,
                             new MediaScannerConnection.OnScanCompletedListener() {

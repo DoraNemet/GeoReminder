@@ -1,6 +1,5 @@
 package com.ferit.dfundak.georeminder;
 
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -10,10 +9,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
@@ -60,12 +58,7 @@ public class ReminderAdapter extends BaseAdapter {
             String mCurrentPhotoPath = reminder.getImageName();
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File file = new File(imageUri.getPath());
-            try {
-                //show image in ImageView
-                InputStream ims = new FileInputStream(file);
-                reminderViewHolder.picture.setImageBitmap(BitmapFactory.decodeStream(ims));
-            } catch (FileNotFoundException e) {
-            }
+            Picasso.with(parent.getContext()).load(file).rotate(90f).into(reminderViewHolder.picture);
         }
 
         if(reminder.getAudioName() != null){
