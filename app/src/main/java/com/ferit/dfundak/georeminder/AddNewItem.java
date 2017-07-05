@@ -113,10 +113,12 @@ public class AddNewItem extends AppCompatActivity {
     private String time = null;
     private String address = null;
 
+    //old from edit
     private String oldDate = null;
     private String oldTime = null;
     private String oldTitle = null;
     private String oldDescription = null;
+    private LatLng oldPinnedLocation = null;
 
     //other
     private String requestFrom = null;
@@ -334,6 +336,9 @@ public class AddNewItem extends AppCompatActivity {
                     location = null;
                 }else{
                     address = locationAddress.getText().toString();
+                    if(location == null){
+                        location = oldPinnedLocation;
+                    }
                 }
 
                 String audioPath = null;
@@ -359,6 +364,7 @@ public class AddNewItem extends AppCompatActivity {
                 editor.commit();
 
                 finish();
+                return;
             }
         });
 
@@ -388,6 +394,7 @@ public class AddNewItem extends AppCompatActivity {
                 }
 
                 finish();
+                return;
             }
         });
 
@@ -447,6 +454,10 @@ public class AddNewItem extends AppCompatActivity {
                     .rotate(90f)
                     .resize(600, 200)
                     .into(imageView);
+        }
+
+        if(reminder.getPinnedLocation() != null){
+            oldPinnedLocation = reminder.getPinnedLocation();
         }
 
         if(reminder.getAudioName() != null){

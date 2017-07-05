@@ -9,4 +9,6 @@
     <string name="add_time">Add time</string>
     <string name="add_date">Add date</string>
     <string name="add_image">Add image</string>
+    <string name="cancel">cancel</string>
+    <string name="ok">ok</string>
 </resources>

@@ -37,6 +37,8 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import static android.webkit.WebViewDatabase.getInstance;
+
 public class MainActivity extends AppCompatActivity implements OnCompleteListener<Void> {
 
     //UI
@@ -47,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     private enum PendingGeofenceTask {
         ADD, REMOVE, NONE
     }
+
     private GeofencingClient mGeofencingClient;
     private ArrayList<Geofence> mGeofenceList;
     private PendingIntent mGeofencePendingIntent;
@@ -65,16 +68,13 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i("dora", "FALSE enter on create");
+        Log.i("dora", "on create");
         setContentView(R.layout.activity_main);
 
         addButton = (FloatingActionButton) findViewById(R.id.add_button);
         reminderList = (ListView) this.findViewById(R.id.remindersLV);
 
-       refreshDataset();
-        /*reminders = this.loadReminders();
-        ReminderAdapter reminderAdapter = new ReminderAdapter(reminders);
-        this.reminderList.setAdapter(reminderAdapter);*/
+        refreshDataset();
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         mGeofencePendingIntent = null;
         mGeofencingClient = LocationServices.getGeofencingClient(this);
         mGeofenceList = new ArrayList<>();
-        populateGeofenceList();
+       // populateGeofenceList();
     }
 
     private void removeAlarm(int id) {
@@ -126,10 +126,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
         removeGeofences();
         Toast.makeText(this, "Reminder removed", Toast.LENGTH_SHORT).show();
-
-        if (mGeofenceList.isEmpty()) {
-            stopTracking();
-        }
     }
 
     //populate listView
@@ -142,18 +138,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     @Override
     protected void onStart() {
         super.onStart();
-        SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
-        Boolean fromNotification = prefs.getBoolean("fromNotification", false);
 
-        if (fromNotification == false || mGeofenceList.size() > 1) {
-            Log.i("dora", "enter on start");
-            if (!checkPermissions()) {
-                requestPermissions();
-            } else {
-                populateGeofenceList();
-            }
-            refreshDataset();
-        }
     }
 
     @Override
@@ -167,6 +152,33 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
+        Boolean fromNotification = prefs.getBoolean("fromNotification", false);
+        Log.i("dora", "on resume");
+        populateGeofenceList();
+
+        if (fromNotification == false) {
+            Log.i("dora", "not from notification");
+            if (!checkPermissions()) {
+                requestPermissions();
+            } else if (!mGeofenceList.isEmpty()) {
+                Log.i("dora", "not empty start geofences");
+                startGeoFences();
+                startTracking();
+            } else {
+                stopTracking();
+            }
+            refreshDataset();
+        }
+        SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putBoolean("fromNotification", false);
+        editor.commit();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
@@ -177,7 +189,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
     //database actions
     private ArrayList<reminderItem> loadReminders() {
-        return DatabaseHandler.getInstance(this).getAllReminders();
+        ArrayList<reminderItem> items = DatabaseHandler.getInstance(this).getAllReminders();
+        return items;
     }
 
     private void deleteFromTable(int id) {
@@ -357,10 +370,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             }
         }
 
-        if (!mGeofenceList.isEmpty()) {
-            startGeoFences();
-            startTracking();
-        } else {
+        if (mGeofenceList.isEmpty()) {
             stopTracking();
         }
     }
