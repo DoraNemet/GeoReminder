@@ -58,7 +58,11 @@ public class ReminderAdapter extends BaseAdapter {
             String mCurrentPhotoPath = reminder.getImageName();
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
             File file = new File(imageUri.getPath());
-            Picasso.with(parent.getContext()).load(file).rotate(90f).into(reminderViewHolder.picture);
+            Picasso.with(parent.getContext())
+                    .load(file)
+                    .rotate(90f)
+                    .resize(600, 200)
+                    .into(reminderViewHolder.picture);
         }
 
         if(reminder.getAudioName() != null){

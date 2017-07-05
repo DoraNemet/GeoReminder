@@ -73,12 +73,11 @@
                 <TextView
                     android:id="@+id/location_textView"
                     style="@style/TextViewDescription"
-                    android:text="Add Location" />
+                    android:text="@string/add_location" />
 
                 <TextView
                     android:id="@+id/radius_textView"
-                    style="@style/TextViewDescription"
-                    tools:text="20 m"/>
+                    style="@style/TextViewDescription" />
             </LinearLayout>
 
         </LinearLayout>
@@ -99,7 +98,7 @@
                 <TextView
                     android:id="@+id/time_textView"
                     style="@style/TextViewDescription"
-                    android:text="Add time" />
+                    android:text="@string/add_time" />
             </LinearLayout>
 
             <LinearLayout
@@ -117,7 +116,7 @@
                 <TextView
                     android:id="@+id/date_textView"
                     style="@style/TextViewDescription"
-                    android:text="Add date" />
+                    android:text="@string/add_date" />
             </LinearLayout>
         </LinearLayout>
 
@@ -135,7 +134,7 @@
 
                 <TextView
                     style="@style/TextViewDescription"
-                    android:text="Add Image" />
+                    android:text="@string/add_image" />
             </LinearLayout>
 
             <FrameLayout

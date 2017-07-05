@@ -49,6 +49,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static com.ferit.dfundak.georeminder.MainActivity.MY_PREFS_NAME;
 
 public class AddNewItem extends AppCompatActivity {
@@ -112,6 +113,11 @@ public class AddNewItem extends AppCompatActivity {
     private String time = null;
     private String address = null;
 
+    private String oldDate = null;
+    private String oldTime = null;
+    private String oldTitle = null;
+    private String oldDescription = null;
+
     //other
     private String requestFrom = null;
     private String STATE = null;
@@ -135,11 +141,14 @@ public class AddNewItem extends AppCompatActivity {
         public void onTimeSet(TimePicker view, int hourPicked, int minutePicked) {
             //todo srediti s append
             timeText.setText(hourPicked + ":" + minutePicked);
-            Calendar c = Calendar.getInstance();
-            year = c.get(Calendar.YEAR);
-            month = c.get(Calendar.MONTH);
-            day = c.get(Calendar.DAY_OF_MONTH);
-            dateText.setText(day + "." + (month + 1) + "." + year);
+
+            if(dateText.getText().equals("Add date")) {
+                Calendar c = Calendar.getInstance();
+                year = c.get(Calendar.YEAR);
+                month = c.get(Calendar.MONTH);
+                day = c.get(Calendar.DAY_OF_MONTH);
+                dateText.setText(day + "." + (month + 1) + "." + year);
+            }
             hour = hourPicked;
             minute = minutePicked;
         }
@@ -153,7 +162,7 @@ public class AddNewItem extends AppCompatActivity {
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final Calendar c = Calendar.getInstance();
 
-            if (day == 0) {
+            if (year == 0) {
                 year = c.get(Calendar.YEAR);
                 month = c.get(Calendar.MONTH);
                 day = c.get(Calendar.DAY_OF_MONTH);
@@ -164,10 +173,16 @@ public class AddNewItem extends AppCompatActivity {
         }
 
         public void onDateSet(DatePicker view, int yearPicked, int monthPicked, int dayPicked) {
-            dateText.setText(day + "." + (month + 1) + "." + year);
             day = dayPicked;
             month = monthPicked;
             year = yearPicked;
+
+            dateText.setText(day + "." + (month + 1) + "." + year);
+
+            if(timeText.getText().equals("Add time")){
+            timeText.setText("8:00");
+            }
+
         }
     }
 
@@ -277,6 +292,7 @@ public class AddNewItem extends AppCompatActivity {
         playAudio.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                OUTPUT_FILE = Environment.getExternalStorageDirectory() + "/GeoReminder_audio" + System.currentTimeMillis() +".3ppp";
                 recordAudio();
                 return true;
             }
@@ -287,6 +303,10 @@ public class AddNewItem extends AppCompatActivity {
             public void onClick(View view) {
                 String id = Long.toString(System.currentTimeMillis());
                 id = id.substring(0, id.length() - 3);
+
+                if(receivedID != 0){
+                    id = Integer.toString(receivedID);
+                }
 
                 if (titleET.getText() == null){
                     title  = null;
@@ -300,7 +320,7 @@ public class AddNewItem extends AppCompatActivity {
                     description = descriptionET.getText().toString();
                 }
 
-                if(dateText.getText().toString().equals("Add date")){
+                if(dateText.getText().toString().equals(getResources().getString(R.string.add_date))){
                     date = null;
                     time = null;
                 }else{
@@ -309,7 +329,7 @@ public class AddNewItem extends AppCompatActivity {
                     setAlarm(id);
                 }
 
-                if(locationAddress.getText().toString().equals("Add location")){
+                if(locationAddress.getText().toString().equals(getResources().getString(R.string.add_location))){
                     address = null;
                     location = null;
                 }else{
@@ -319,6 +339,7 @@ public class AddNewItem extends AppCompatActivity {
                 String audioPath = null;
                 if(mediaPlayer != null){
                     audioPath = OUTPUT_FILE;
+                }else{
                 }
 
                 if(radius == 0 && address != null){
@@ -329,12 +350,9 @@ public class AddNewItem extends AppCompatActivity {
 
                 if(STATE == "EDIT"){
                     updateDatabes(reminder, receivedID);
-
                 }
                 else{
                     DatabaseHandler.getInstance(getApplicationContext()).insertReminder(reminder);
-
-                    Log.i("dora", "id set" + id);
                 }
                 SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
                 editor.putBoolean("fromNotification", false);
@@ -347,6 +365,28 @@ public class AddNewItem extends AppCompatActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if(STATE == "EDIT" && oldDate != null){
+                    long oldTimeinMS = getTimeInMs(oldDate, oldTime);
+
+                    Intent intent = new Intent(AddNewItem.this, AlarmReceiver.class);
+
+                    if(oldTitle != null){
+                        intent.putExtra("title", oldTitle);
+                    }else{
+                        intent.putExtra("title", "GeoReminder");
+                    }
+                    if (oldDescription != null){
+                        intent.putExtra("description", oldDescription);
+                    } else{
+                        intent.putExtra("description", "You've set up reminder!");
+                    }
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(AddNewItem.this, receivedID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, oldTimeinMS, pendingIntent);
+                }
+
                 finish();
             }
         });
@@ -354,20 +394,41 @@ public class AddNewItem extends AppCompatActivity {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
-    //if there is data to be edited, load it
+    private long getTimeInMs(String date, String time) {
+
+        String[] partsDate = date.split("\\.");
+        String[] partsTime = time.split(":");
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, Integer.parseInt(partsDate[2]));
+        cal.set(Calendar.MONTH, Integer.parseInt(partsDate[1])-1);
+        cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(partsDate[0]));
+        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(partsTime[0]));
+        cal.set(Calendar.MINUTE, Integer.parseInt(partsTime[1]));
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Log.i("dora", "time in ms:" + cal.getTimeInMillis());
+        return cal.getTimeInMillis();
+    }
+
+    //if EDIT, load data
     private void setupData(int receivedID) {
         final reminderItem reminder = selectFromTableMet(receivedID);
 
         if(reminder.getTitle()!= null){
             titleET.setText(reminder.getTitle());
+            oldTitle = reminder.getTitle();
         }
         if(reminder.getDescription()!= null){
             descriptionET.setText(reminder.getDescription());
+            oldDescription = reminder.getDescription();
         }
         if(reminder.getDate()!= null){
+            oldDate = reminder.getDate();
             dateText.setText(reminder.getDate());
         }
         if(reminder.getTime()!= null){
+            oldTime = reminder.getTime();
             timeText.setText(reminder.getTime());
         }
         if(reminder.getAddress()!= null){
@@ -379,34 +440,26 @@ public class AddNewItem extends AppCompatActivity {
         if(reminder.getImageName() != null){
             mCurrentPhotoPath = reminder.getImageName();
             String photoPath = reminder.getImageName();
-            Log.i("dora", "photo path" + photoPath);
             Uri imageUri = Uri.parse(photoPath);
             File file = new File(imageUri.getPath());
-            Picasso.with(this).load(file).rotate(90f).into(imageView);
+            Picasso.with(this)
+                    .load(file)
+                    .rotate(90f)
+                    .resize(600, 200)
+                    .into(imageView);
         }
 
         if(reminder.getAudioName() != null){
+            OUTPUT_FILE = reminder.getAudioName();
             addAudio.setVisibility(View.GONE);
             playAudio.setVisibility(View.VISIBLE);
-            playAudio.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    MediaPlayer mediaPlayer = new MediaPlayer();
-                    try {
-                        mediaPlayer.setDataSource(reminder.getAudioName());
-                        mediaPlayer.prepare();
-                        mediaPlayer.start();
-                    }
-                    catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            });
+
         }else{
             OUTPUT_FILE = Environment.getExternalStorageDirectory() + "/GeoReminder_audio" + System.currentTimeMillis() +".3ppp";
         }
     }
 
+    //database connection
     private reminderItem selectFromTableMet(int receivedID) {
         return DatabaseHandler.getInstance(this).selectFromTable(receivedID);
     }
@@ -415,6 +468,7 @@ public class AddNewItem extends AppCompatActivity {
         DatabaseHandler.getInstance(this).updateReminder(reminder, receivedID);
     }
 
+    //alarm and time
     private void setAlarm(String id) {
         Intent intent = new Intent(this, AlarmReceiver.class);
         if (title != null){
@@ -427,7 +481,7 @@ public class AddNewItem extends AppCompatActivity {
         } else{
             intent.putExtra("description", "You've set up reminder!");
         }
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(id), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, Integer.parseInt(id), intent, FLAG_UPDATE_CURRENT);
 
         long alarmTime = getTime();
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
@@ -448,9 +502,8 @@ public class AddNewItem extends AppCompatActivity {
         return cal.getTimeInMillis();
         }
 
+    //playing and recording sound
     public void recordAudio() {
-        Log.i("dora", "in record audio");
-
         final Dialog popupDialog = new Dialog(this);
         popupDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         popupDialog.setContentView(R.layout.add_new_item_record_popup);
@@ -597,7 +650,11 @@ public class AddNewItem extends AppCompatActivity {
                     Uri imageUri = Uri.parse(mCurrentPhotoPath);
                     File file = new File(imageUri.getPath());
                         //show image in ImageView
-                    Picasso.with(this).load(file).rotate(90f).into(imageView);
+                    Picasso.with(this)
+                            .load(file)
+                            .rotate(90f)
+                            .resize(600, 200)
+                            .into(imageView);
                     cameraIcon = (ImageView) findViewById(R.id.camera_icon);
                     cameraIcon.setImageResource(R.drawable.picture_green);
 
@@ -852,6 +909,7 @@ public class AddNewItem extends AppCompatActivity {
 
     Uri photoURI;
 
+    //taking photo and savinf in file
     private void takePicture() throws IOException {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Check if there is camera activity to handle the intent

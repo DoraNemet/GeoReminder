@@ -42,7 +42,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
     private EditText radiusInput;
 
     //address
-    LatLng pinnedLocation;
+    LatLng pinnedLocation = null;
     double radius;
 
     @Override
@@ -68,11 +68,13 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
                     radius = Double.parseDouble(radiusBox);
                 }
 
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("KEY_RADIUS", radius);
-                resultIntent.putExtra("KEY_LAT", pinnedLocation.latitude);
-                resultIntent.putExtra("KEY_LNG", pinnedLocation.longitude);
-                setResult(RESULT_OK, resultIntent);
+                if(pinnedLocation != null){
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("KEY_RADIUS", radius);
+                    resultIntent.putExtra("KEY_LAT", pinnedLocation.latitude);
+                    resultIntent.putExtra("KEY_LNG", pinnedLocation.longitude);
+                    setResult(RESULT_OK, resultIntent);
+                }
                 finish();
             }
         });

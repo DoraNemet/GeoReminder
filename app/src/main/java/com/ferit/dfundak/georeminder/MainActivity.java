@@ -43,9 +43,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     private FloatingActionButton addButton;
     private ListView reminderList;
 
-    //Geofence
-    private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+    //gepfence
     private enum PendingGeofenceTask {
         ADD, REMOVE, NONE
     }
@@ -67,63 +65,56 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //check if it is running in background
+        Log.i("dora", "FALSE enter on create");
+        setContentView(R.layout.activity_main);
 
-        SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
-        Boolean fromNotification = prefs.getBoolean("fromNotification", false);
-        if (fromNotification == false) {
-            setContentView(R.layout.activity_main);
+        addButton = (FloatingActionButton) findViewById(R.id.add_button);
+        reminderList = (ListView) this.findViewById(R.id.remindersLV);
 
-            addButton = (FloatingActionButton) findViewById(R.id.add_button);
-            reminderList = (ListView) this.findViewById(R.id.remindersLV);
+       refreshDataset();
+        /*reminders = this.loadReminders();
+        ReminderAdapter reminderAdapter = new ReminderAdapter(reminders);
+        this.reminderList.setAdapter(reminderAdapter);*/
 
-            reminders = this.loadReminders();
-            ReminderAdapter reminderAdapter = new ReminderAdapter(reminders);
-            this.reminderList.setAdapter(reminderAdapter);
-
-            addButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(MainActivity.this, AddNewItem.class);
-                    intent.putExtra("ID", 0);
-                    startActivity(intent);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AddNewItem.class);
+                intent.putExtra("ID", 0);
+                startActivity(intent);
             }
-            });
+        });
 
-            reminderList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
-                    deleteFromTable(reminder.getID());
-                    removeAlarm(reminder.getID());
-                    refreshDataset();
-                    return false;
-                }
-            });
+        reminderList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
+                deleteFromTable(reminder.getID());
+                removeAlarm(reminder.getID());
+                refreshDataset();
+                return false;
+            }
+        });
 
-            reminderList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
-                    Intent intent = new Intent(MainActivity.this, AddNewItem.class);
-                    intent.putExtra("ID", reminder.getID());
-                    fromApp = false;
-                    removeAlarm(reminder.getID());
-                    startActivity(intent);
-                }
-            });
+        reminderList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
+                Intent intent = new Intent(MainActivity.this, AddNewItem.class);
+                intent.putExtra("ID", reminder.getID());
+                fromApp = false;
+                removeAlarm(reminder.getID());
+                startActivity(intent);
+            }
+        });
 
-            this.mLocationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-            this.mLocationListener = new SimpleLocationListener();
+        this.mLocationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
+        this.mLocationListener = new SimpleLocationListener();
 
-            //geofence
-            mGeofenceList = new ArrayList<>();
-            mGeofencePendingIntent = null;
-            mGeofencingClient = LocationServices.getGeofencingClient(this);
-        }
-        SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
-        editor.putBoolean("fromNotification", false);
-        editor.commit();
+        mGeofencePendingIntent = null;
+        mGeofencingClient = LocationServices.getGeofencingClient(this);
+        mGeofenceList = new ArrayList<>();
+        populateGeofenceList();
     }
 
     private void removeAlarm(int id) {
@@ -132,22 +123,20 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), id, intent, 0);
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
+
         removeGeofences();
         Toast.makeText(this, "Reminder removed", Toast.LENGTH_SHORT).show();
+
+        if (mGeofenceList.isEmpty()) {
+            stopTracking();
+        }
     }
 
+    //populate listView
     private void refreshDataset() {
-        ArrayList<reminderItem> reminders = this.loadReminders();
+        reminders = this.loadReminders();
         ReminderAdapter reminderAdapter = new ReminderAdapter(reminders);
         this.reminderList.setAdapter(reminderAdapter);
-    }
-
-    private ArrayList<reminderItem> loadReminders() {
-        return DatabaseHandler.getInstance(this).getAllReminders();
-    }
-
-    private void deleteFromTable(int id) {
-        DatabaseHandler.getInstance(this).deleteFromTable(id);
     }
 
     @Override
@@ -155,18 +144,13 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         super.onStart();
         SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
         Boolean fromNotification = prefs.getBoolean("fromNotification", false);
-        mGeofenceList = new ArrayList<>();
-        if (fromNotification == false){
+
+        if (fromNotification == false || mGeofenceList.size() > 1) {
+            Log.i("dora", "enter on start");
             if (!checkPermissions()) {
                 requestPermissions();
             } else {
                 populateGeofenceList();
-                startGeoFences();
-                if(!mGeofenceList.isEmpty()){
-                    startTracking();
-                }else{
-                    stopTracking();
-                }
             }
             refreshDataset();
         }
@@ -175,9 +159,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     @Override
     protected void onPause() {
         super.onPause();
-        SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
-        editor.putBoolean("fromNotification", false);
-        editor.commit();
     }
 
     @Override
@@ -194,8 +175,18 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         stopTracking();
     }
 
+    //database actions
+    private ArrayList<reminderItem> loadReminders() {
+        return DatabaseHandler.getInstance(this).getAllReminders();
+    }
+
+    private void deleteFromTable(int id) {
+        DatabaseHandler.getInstance(this).deleteFromTable(id);
+    }
+
+
     private GeofencingRequest getGeofencingRequest() {
-        if(!mGeofenceList.isEmpty()){
+        if (!mGeofenceList.isEmpty()) {
             GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
             builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
             builder.addGeofences(mGeofenceList);
@@ -215,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
     @SuppressWarnings("MissingPermission")
     private void addGeofences() {
-        if(getGeofencingRequest() != null) {
+        if (getGeofencingRequest() != null) {
             mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
                     .addOnCompleteListener(this);
         }
@@ -226,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         Log.d("dora", "Tracking started.");
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        String locationProvider = this.mLocationManager.getBestProvider(criteria,true);
+        String locationProvider = this.mLocationManager.getBestProvider(criteria, true);
         long minTime = 1000;
         float minDistance = 10;
         this.mLocationManager.requestLocationUpdates(locationProvider, minTime, minDistance,
@@ -235,15 +226,27 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
     private void stopTracking() {
         Log.d("dora", "Tracking stopped.");
-        this.mLocationManager.removeUpdates(this.mLocationListener);
+        if (this.mLocationManager != null) {
+            this.mLocationManager.removeUpdates(this.mLocationListener);
+        }
     }
 
-    private class SimpleLocationListener implements LocationListener{
+    private class SimpleLocationListener implements LocationListener {
         @Override
-        public void onLocationChanged(Location location) { }
-        @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
-        @Override public void onProviderEnabled(String provider) { }
-        @Override public void onProviderDisabled(String provider) {}
+        public void onLocationChanged(Location location) {
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+        }
     }
 
     //remove geofence
@@ -257,10 +260,10 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                         mGeofenceList.clear();
                         Log.i("dora", "REMOVED");
 
-                        if(fromApp){
+                        if (fromApp) {
                             populateGeofenceList();
                             startGeoFences();
-                        }else{
+                        } else {
                             fromApp = true;
                         }
                     }
@@ -317,42 +320,49 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
         reminders = this.loadReminders();
 
-         for (int i = 0; i < reminders.size(); i++){
-             int mId = reminders.get(i).getID();
-             LatLng mPinnedLocation = reminders.get(i).getPinnedLocation();
-             double mRadius = reminders.get(i).getRadius();
-             String mDate = reminders.get(i).getDate();
-             String mTime = reminders.get(i).getTime();
+        for (int i = 0; i < reminders.size(); i++) {
+            int mId = reminders.get(i).getID();
+            LatLng mPinnedLocation = reminders.get(i).getPinnedLocation();
+            double mRadius = reminders.get(i).getRadius();
+            String mDate = reminders.get(i).getDate();
+            String mTime = reminders.get(i).getTime();
 
-             if(mRadius == 0){
-                 mRadius = 50;
-             }
+            if (mRadius == 0) {
+                mRadius = 50;
+            }
 
-             long expirationInMilliseconds;
+            long expirationInMilliseconds;
 
-             if(mDate == null || mTime == null){
-                 long GEOFENCE_EXPIRATION_IN_HOURS = 336;
-                 expirationInMilliseconds= GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
-             }else {
-                 expirationInMilliseconds = getTimeInMs(mDate, mTime);
-             }
+            if (mDate == null || mTime == null) {
+                long GEOFENCE_EXPIRATION_IN_HOURS = 336;
+                expirationInMilliseconds = GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
+            } else {
+                expirationInMilliseconds = getTimeInMs(mDate, mTime);
+            }
 
-             if(mPinnedLocation == null){
-                 continue;
-             } else{
-                 Log.i("dora", "add geofence " + mId + " " + mRadius + " ||" + mPinnedLocation.latitude + " " + mPinnedLocation.longitude + "|| " + mDate + " " + mTime);
-                 mGeofenceList.add(new Geofence.Builder()
-                         .setRequestId(Integer.toString(mId))
-                         .setCircularRegion(
-                                 mPinnedLocation.latitude,
-                                 mPinnedLocation.longitude,
-                                 (float)mRadius
-                         )
-                         .setExpirationDuration(expirationInMilliseconds)
-                         .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-                         .build());
-             }
-         }
+            if (mPinnedLocation == null) {
+                continue;
+            } else {
+                Log.i("dora", "add geofence " + mId + " " + mRadius + " ||" + mPinnedLocation.latitude + " " + mPinnedLocation.longitude + "|| " + mDate + " " + mTime);
+                mGeofenceList.add(new Geofence.Builder()
+                        .setRequestId(Integer.toString(mId))
+                        .setCircularRegion(
+                                mPinnedLocation.latitude,
+                                mPinnedLocation.longitude,
+                                (float) mRadius
+                        )
+                        .setExpirationDuration(expirationInMilliseconds)
+                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                        .build());
+            }
+        }
+
+        if (!mGeofenceList.isEmpty()) {
+            startGeoFences();
+            startTracking();
+        } else {
+            stopTracking();
+        }
     }
 
     private long getTimeInMs(String date, String time) {
@@ -362,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, Integer.parseInt(partsDate[2]));
-        cal.set(Calendar.MONTH, Integer.parseInt(partsDate[1])-1);
+        cal.set(Calendar.MONTH, Integer.parseInt(partsDate[1]) - 1);
         cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(partsDate[0]));
         cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(partsTime[0]));
         cal.set(Calendar.MINUTE, Integer.parseInt(partsTime[1]));
@@ -375,8 +385,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     private void performPendingGeofenceTask() {
         if (mPendingGeofenceTask == PendingGeofenceTask.ADD) {
             addGeofences();
-        }
-        else if (mPendingGeofenceTask == PendingGeofenceTask.REMOVE) {
+        } else if (mPendingGeofenceTask == PendingGeofenceTask.REMOVE) {
             removeGeofences();
         }
     }
