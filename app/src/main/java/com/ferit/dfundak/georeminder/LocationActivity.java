@@ -19,6 +19,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -53,7 +55,6 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         this.okButton = (Button) findViewById(R.id.ok_button);
         this.cancelButton = (Button) findViewById(R.id.cancel_button);
         this.radiusInput = (EditText) findViewById(R.id.radius_input);
-        //radiusInput.setText("20");
 
         this.initialize();
 
@@ -93,12 +94,22 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
         this.mCustomOnMapClickListener = new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                String radiusBox = radiusInput.getText().toString();
+                if(radiusBox.isEmpty()){
+                    radius = 20;
+                }else{
+                    radius = Double.parseDouble(radiusBox);
+                }
+
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(latLng);
-                markerOptions.title(latLng.latitude + " : " + latLng.longitude);
                 mGoogleMap.clear();
                 mGoogleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
                 mGoogleMap.addMarker(markerOptions);
+                Circle circle = mGoogleMap.addCircle(new CircleOptions()
+                        .center(new LatLng(latLng.latitude, latLng.longitude))
+                        .radius(radius)
+                        .strokeColor(R.color.colorPrimary));
                 pinnedLocation = latLng;
                 getLocationAddress(latLng);
                 }
