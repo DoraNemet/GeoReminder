@@ -2,17 +2,21 @@ package com.ferit.dfundak.georeminder;
 
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import static com.ferit.dfundak.georeminder.R.id.address;
 
 /**
  * Created by Dora on 30/06/2017.
@@ -48,12 +52,41 @@ public class ReminderAdapter extends BaseAdapter {
 
         final reminderItem reminder = this.mReminders.get(position);
 
-        reminderViewHolder.titleTV.setText(reminder.getTitle());
-        reminderViewHolder.descriptionTV.setText(reminder.getDescription());
-        reminderViewHolder.dateTv.setText(reminder.getTime());
-        reminderViewHolder.timeTv.setText(reminder.getDate());
-        reminderViewHolder.addressTV.setText(reminder.getAddress());
+        if(reminder.getTitle() == null){
+            reminderViewHolder.titleTV.setVisibility(View.GONE);
+        }else{
+            reminderViewHolder.titleTV.setText(reminder.getTitle());
+        }
 
+        if(reminder.getDescription() == null){
+            reminderViewHolder.descriptionTV.setVisibility(View.GONE);
+        }else{
+            reminderViewHolder.descriptionTV.setText(reminder.getDescription());
+        }
+
+
+       if(reminder.getTime() == null){
+           reminderViewHolder.dateTv.setVisibility(View.GONE);
+           reminderViewHolder.timeTv.setVisibility(View.GONE);
+           if(reminder.getImageName()== null){
+               reminderViewHolder.timeImageLayout.setVisibility(View.GONE);
+           }
+       }else {
+           reminderViewHolder.dateTv.setText(reminder.getTime());
+           reminderViewHolder.timeTv.setText(reminder.getDate());
+       }
+        if(reminder.getAddress() == null){
+            reminderViewHolder.addressIcon.setVisibility(View.GONE);
+            reminderViewHolder.addressTV.setVisibility(View.GONE);
+            reminderViewHolder.addressLayout.setVisibility(View.GONE);
+        }else{
+            reminderViewHolder.addressTV.setText(reminder.getAddress());
+        }
+        Log.i("dora", "gone |" + reminder.getDescription() + "|");
+        if(reminder.getDescription().equals("") && reminder.getAudioName() == null){
+            Log.i("dora", "gone" + reminder.getDescription() +" "+ reminder.getAudioName());
+            reminderViewHolder.descriptionLayout.setVisibility(View.GONE);
+        }
         if(reminder.getImageName() != null){
             String mCurrentPhotoPath = reminder.getImageName();
             Uri imageUri = Uri.parse(mCurrentPhotoPath);
@@ -63,6 +96,8 @@ public class ReminderAdapter extends BaseAdapter {
                     .rotate(90f)
                     .resize(600, 200)
                     .into(reminderViewHolder.picture);
+        }else{
+            reminderViewHolder.picture.setVisibility(View.GONE);
         }
 
         if(reminder.getAudioName() != null){
@@ -80,6 +115,8 @@ public class ReminderAdapter extends BaseAdapter {
                     }
                 }
             });
+        }else{
+            reminderViewHolder.playButton.setVisibility(View.INVISIBLE);
         }
 
         return convertView;
@@ -92,16 +129,21 @@ public class ReminderAdapter extends BaseAdapter {
 
     public static class ViewHolder {
         public TextView titleTV, descriptionTV, timeTv, dateTv, addressTV;
-        public ImageView picture, playButton;
+        public ImageView picture, playButton, addressIcon;
+        public LinearLayout addressLayout, descriptionLayout, timeImageLayout;
 
         public ViewHolder(View bookView) {
             titleTV = (TextView) bookView.findViewById(R.id.title);
             descriptionTV = (TextView) bookView.findViewById(R.id.description);
             timeTv = (TextView) bookView.findViewById(R.id.time);
             dateTv = (TextView) bookView.findViewById(R.id.date);
-            addressTV = (TextView) bookView.findViewById(R.id.address);
+            addressTV = (TextView) bookView.findViewById(address);
             picture = (ImageView) bookView.findViewById(R.id.picture);
             playButton = (ImageView) bookView.findViewById(R.id.play_button);
+            addressIcon = (ImageView) bookView.findViewById(R.id.address_icon);
+            addressLayout = (LinearLayout) bookView.findViewById(R.id.address_layout);
+            descriptionLayout = (LinearLayout) bookView.findViewById(R.id.description_layout);
+            timeImageLayout = (LinearLayout) bookView.findViewById(R.id.date_time_layout);
         }
     }
 }

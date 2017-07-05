@@ -144,6 +144,9 @@ public class AddNewItem extends AppCompatActivity {
             //todo srediti s append
             timeText.setText(hourPicked + ":" + minutePicked);
 
+            hour = hourPicked;
+            minute = minutePicked;
+
             if(dateText.getText().equals("Add date")) {
                 Calendar c = Calendar.getInstance();
                 year = c.get(Calendar.YEAR);
@@ -151,8 +154,8 @@ public class AddNewItem extends AppCompatActivity {
                 day = c.get(Calendar.DAY_OF_MONTH);
                 dateText.setText(day + "." + (month + 1) + "." + year);
             }
-            hour = hourPicked;
-            minute = minutePicked;
+
+            timeIcon.setImageResource(R.drawable.time_green);
         }
     }
 
@@ -185,6 +188,7 @@ public class AddNewItem extends AppCompatActivity {
             timeText.setText("8:00");
             }
 
+            dateIcon.setImageResource(R.drawable.calendar_green);
         }
     }
 
@@ -197,17 +201,24 @@ public class AddNewItem extends AppCompatActivity {
         addLocation = (LinearLayout) findViewById(R.id.add_location);
         addTime = (LinearLayout) findViewById(R.id.add_time);
         addDate = (LinearLayout) findViewById(R.id.add_date);
-        addAudio = (ImageView) findViewById(R.id.add_audio);
-        playAudio = (ImageView) findViewById(R.id.play_audio);
-        locationAddress = (TextView) findViewById(R.id.location_textView);
-        radiusTextView = (TextView) findViewById(R.id.radius_textView);
-        imageView = (ImageView) findViewById(R.id.image_view);
-        timeText = (TextView) findViewById(R.id.time_textView);
-        dateText = (TextView) findViewById(R.id.date_textView);
-        okButton = (Button) findViewById(R.id.ok_button);
-        cancelButton = (Button) findViewById(R.id.cancel_button);
+
         titleET = (EditText) findViewById(R.id.titleET);
         descriptionET = (EditText) findViewById(R.id.descriptionET);
+
+        locationAddress = (TextView) findViewById(R.id.location_textView);
+        radiusTextView = (TextView) findViewById(R.id.radius_textView);
+
+        timeText = (TextView) findViewById(R.id.time_textView);
+        dateText = (TextView) findViewById(R.id.date_textView);
+
+        imageView = (ImageView) findViewById(R.id.image_view);
+        timeIcon = (ImageView) findViewById(R.id.time_icon);
+        dateIcon = (ImageView) findViewById(R.id.date_icon);
+        addAudio = (ImageView) findViewById(R.id.add_audio);
+        playAudio = (ImageView) findViewById(R.id.play_audio);
+
+        okButton = (Button) findViewById(R.id.ok_button);
+        cancelButton = (Button) findViewById(R.id.cancel_button);
 
         receivedID = getIntent().getExtras().getInt("ID", 0);
         if(receivedID != 0){
@@ -351,6 +362,7 @@ public class AddNewItem extends AppCompatActivity {
                     radius = 20;
                 }
 
+                Log.i("dora", "item: " + id + "|" + location + "|" + radius + "|" + title + "|" + description + "|" + date + "|" + time + "|" +mCurrentPhotoPath + "|" + address + "|" + audioPath);
                 reminderItem reminder = new reminderItem(Integer.parseInt(id), location, radius, title, description, date, time, mCurrentPhotoPath ,address, audioPath);
 
                 if(STATE == "EDIT"){
@@ -440,6 +452,8 @@ public class AddNewItem extends AppCompatActivity {
         }
         if(reminder.getAddress()!= null){
             locationAddress.setText(reminder.getAddress());
+            locationIcon = (ImageView) findViewById(R.id.location_icon);
+            locationIcon.setImageResource(R.drawable.location_green);
         }
         if(reminder.getRadius()!= 0){
             radiusTextView.setText(Double.toString(reminder.getRadius()));
@@ -454,6 +468,8 @@ public class AddNewItem extends AppCompatActivity {
                     .rotate(90f)
                     .resize(600, 200)
                     .into(imageView);
+            cameraIcon = (ImageView) findViewById(R.id.camera_icon);
+            cameraIcon.setImageResource(R.drawable.picture_green);
         }
 
         if(reminder.getPinnedLocation() != null){
@@ -666,6 +682,7 @@ public class AddNewItem extends AppCompatActivity {
                             .rotate(90f)
                             .resize(600, 200)
                             .into(imageView);
+
                     cameraIcon = (ImageView) findViewById(R.id.camera_icon);
                     cameraIcon.setImageResource(R.drawable.picture_green);
 

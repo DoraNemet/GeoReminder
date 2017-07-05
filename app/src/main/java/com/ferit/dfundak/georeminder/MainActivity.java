@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         alarmManager.cancel(pendingIntent);
 
         removeGeofences();
-        Toast.makeText(this, "Reminder removed", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Reminder removed", Toast.LENGTH_SHORT).show();
     }
 
     //populate listView

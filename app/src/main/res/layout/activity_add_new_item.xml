@@ -19,6 +19,9 @@
 
         <EditText
             android:id="@+id/titleET"
+            android:maxLength="20"
+            android:maxLines="1"
+            android:inputType="text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="title" />
@@ -35,6 +38,9 @@
             <EditText
                 android:id="@+id/descriptionET"
                 android:layout_width="272dp"
+                android:maxLength="50"
+                android:maxLines="1"
+                android:inputType="text"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.64"
                 android:hint="description" />
