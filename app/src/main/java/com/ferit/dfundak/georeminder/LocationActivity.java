@@ -96,7 +96,7 @@ public class LocationActivity extends AppCompatActivity implements OnMapReadyCal
             public void onMapClick(LatLng latLng) {
                 String radiusBox = radiusInput.getText().toString();
                 if(radiusBox.isEmpty()){
-                    radius = 20;
+                    radius = 50;
                 }else{
                     radius = Double.parseDouble(radiusBox);
                 }

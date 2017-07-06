@@ -142,10 +142,24 @@ public class AddNewItem extends AppCompatActivity {
         }
 
         public void onTimeSet(TimePicker view, int hourPicked, int minutePicked) {
-            timeText.setText(hourPicked + ":" + minutePicked);
+
+            String setTime = "";
+
+            if(hourPicked < 10){
+                setTime += "0" + hourPicked;
+            }else{
+                setTime += hourPicked;
+            }
+            if(minutePicked <10){
+                setTime += ":0" + minutePicked;
+            }else{
+                setTime += ":" + minutePicked;
+            }
+            timeText.setText(setTime);
 
             hour = hourPicked;
             minute = minutePicked;
+
 
             if(dateText.getText().equals("Add date")) {
                 Calendar c = Calendar.getInstance();
@@ -185,7 +199,7 @@ public class AddNewItem extends AppCompatActivity {
             dateText.setText(day + "." + (month + 1) + "." + year);
 
             if(timeText.getText().equals("Add time")){
-            timeText.setText("8:00");
+            timeText.setText("08:00");
             }
 
             dateIcon.setImageResource(R.drawable.calendar_green);

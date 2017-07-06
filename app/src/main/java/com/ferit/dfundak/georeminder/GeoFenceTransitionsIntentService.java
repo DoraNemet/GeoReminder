@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -16,6 +15,9 @@ import com.google.android.gms.location.GeofencingEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
+import static android.support.v4.app.NotificationCompat.DEFAULT_SOUND;
+import static android.support.v4.app.NotificationCompat.DEFAULT_VIBRATE;
 import static com.ferit.dfundak.georeminder.MainActivity.MY_PREFS_NAME;
 
 /**
@@ -121,8 +123,7 @@ public class GeoFenceTransitionsIntentService extends IntentService {
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationDescription)
                 .setSmallIcon(R.drawable.alarm)
-                .setVibrate(new long[]{1000, 1000})
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setDefaults(DEFAULT_SOUND | DEFAULT_VIBRATE | DEFAULT_LIGHTS)
                 .setContentIntent(notificationPendingIntent);
 
         NotificationManager mNotificationManager =

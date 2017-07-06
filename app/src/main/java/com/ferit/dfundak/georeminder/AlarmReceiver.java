@@ -6,12 +6,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
 import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
+import static android.support.v4.app.NotificationCompat.DEFAULT_SOUND;
+import static android.support.v4.app.NotificationCompat.DEFAULT_VIBRATE;
 import static com.ferit.dfundak.georeminder.MainActivity.MY_PREFS_NAME;
 
 /**
@@ -48,8 +50,7 @@ public class AlarmReceiver extends BroadcastReceiver
                 .setContentTitle(title)
                 .setContentText(description)
                 .setSmallIcon(R.drawable.alarm)
-                .setVibrate(new long[]{1000, 1000})
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setDefaults(DEFAULT_SOUND | DEFAULT_VIBRATE | DEFAULT_LIGHTS)
                 .setContentIntent(notificationPendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
