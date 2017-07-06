@@ -312,6 +312,7 @@ public class AddNewItem extends AppCompatActivity {
             }
         });
 
+
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -446,10 +447,12 @@ public class AddNewItem extends AppCompatActivity {
         if(reminder.getDate()!= null){
             oldDate = reminder.getDate();
             dateText.setText(reminder.getDate());
+            dateIcon.setImageResource(R.drawable.calendar_green);
         }
         if(reminder.getTime()!= null){
             oldTime = reminder.getTime();
             timeText.setText(reminder.getTime());
+            timeIcon.setImageResource(R.drawable.time_green);
         }
         if(reminder.getAddress()!= null){
             locationAddress.setText(reminder.getAddress());

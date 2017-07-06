@@ -19,7 +19,7 @@
 
         <EditText
             android:id="@+id/titleET"
-            android:maxLength="20"
+            android:maxLength="50"
             android:maxLines="1"
             android:inputType="textCapWords"
             android:layout_width="match_parent"
