@@ -115,6 +115,38 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         mGeofencingClient = LocationServices.getGeofencingClient(this);
         mGeofenceList = new ArrayList<>();
        // populateGeofenceList();
+
+        checkGPS();
+    }
+
+    private void checkGPS() {
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            GPSDisabledAlert();
+        }
+    }
+
+    private void GPSDisabledAlert(){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("GPS is disabled on your device. Would you like to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Go to Settings",
+                        new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int id){
+                                Intent callGPSSettingIntent = new Intent(
+                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(callGPSSettingIntent);
+                            }
+                        });
+        alertDialogBuilder.setNegativeButton("No",
+                new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int id){
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
     }
 
     private void removeAlarm(int id) {
@@ -225,9 +257,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         }
     }
 
-    //tracking location
+    //start tracking location
     private void startTracking() {
-        Log.d("dora", "Tracking started.");
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
         String locationProvider = this.mLocationManager.getBestProvider(criteria, true);

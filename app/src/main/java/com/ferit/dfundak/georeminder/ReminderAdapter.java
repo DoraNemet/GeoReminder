@@ -82,9 +82,7 @@ public class ReminderAdapter extends BaseAdapter {
         }else{
             reminderViewHolder.addressTV.setText(reminder.getAddress());
         }
-        Log.i("dora", "gone |" + reminder.getDescription() + "|");
         if(reminder.getDescription().equals("") && reminder.getAudioName() == null){
-            Log.i("dora", "gone" + reminder.getDescription() +" "+ reminder.getAudioName());
             reminderViewHolder.descriptionLayout.setVisibility(View.GONE);
         }
         if(reminder.getImageName() != null){

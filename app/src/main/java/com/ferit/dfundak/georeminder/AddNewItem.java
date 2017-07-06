@@ -124,6 +124,7 @@ public class AddNewItem extends AppCompatActivity {
     private String requestFrom = null;
     private String STATE = null;
     private int receivedID;
+    private boolean recordedSound = false;
 
     //time picker fragment
     public static class TimePickerFragment extends DialogFragment
@@ -353,7 +354,7 @@ public class AddNewItem extends AppCompatActivity {
                 }
 
                 String audioPath = null;
-                if(mediaPlayer != null){
+                if(recordedSound == true){
                     audioPath = OUTPUT_FILE;
                 }else{
                 }
@@ -634,6 +635,7 @@ public class AddNewItem extends AppCompatActivity {
         try {
             recorder.prepare();
             recorder.start();
+            recordedSound = true;
         }catch (IllegalStateException e) {
             e.printStackTrace();
         } catch (IOException e) {
