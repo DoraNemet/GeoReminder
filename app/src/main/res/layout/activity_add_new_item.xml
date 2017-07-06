@@ -15,21 +15,21 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Title" />
+            android:text="@string/title" />
 
         <EditText
             android:id="@+id/titleET"
             android:maxLength="20"
             android:maxLines="1"
-            android:inputType="text"
+            android:inputType="textCapWords"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="title" />
+            android:hint="@string/title" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Description" />
+            android:text="@string/description" />
 
         <LinearLayout
             style="@style/LinearLayoutAdd"
@@ -40,10 +40,10 @@
                 android:layout_width="272dp"
                 android:maxLength="50"
                 android:maxLines="1"
-                android:inputType="text"
+                android:inputType="textCapWords"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.64"
-                android:hint="description" />
+                android:hint="@string/description" />
 
             <ImageView
                 android:id="@+id/add_audio"

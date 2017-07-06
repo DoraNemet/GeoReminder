@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i("dora", "on create");
         setContentView(R.layout.activity_main);
 
         addButton = (FloatingActionButton) findViewById(R.id.add_button);
@@ -87,12 +86,31 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
         reminderList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
-                deleteFromTable(reminder.getID());
-                removeAlarm(reminder.getID());
-                refreshDataset();
-                return false;
+            public boolean onItemLongClick(final AdapterView<?> adapterView, View view, final int i, long l) {
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                alertDialogBuilder.setMessage("Would you like to remove selected reminder?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener(){
+                                    public void onClick(DialogInterface dialog, int id){
+
+                                        reminderItem reminder = (reminderItem) adapterView.getItemAtPosition(i);
+                                        deleteFromTable(reminder.getID());
+                                        removeAlarm(reminder.getID());
+                                        refreshDataset();
+                                    }
+                                });
+                alertDialogBuilder.setNegativeButton("No",
+                        new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int id){
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alert = alertDialogBuilder.create();
+                alert.show();
+
+                return true;
             }
         });
 
@@ -114,9 +132,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         mGeofencePendingIntent = null;
         mGeofencingClient = LocationServices.getGeofencingClient(this);
         mGeofenceList = new ArrayList<>();
-       // populateGeofenceList();
-
-        checkGPS();
     }
 
     private void checkGPS() {
@@ -155,9 +170,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), id, intent, 0);
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
-
         removeGeofences();
-        //Toast.makeText(this, "Reminder removed", Toast.LENGTH_SHORT).show();
     }
 
     //populate listView
@@ -189,7 +202,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
         SharedPreferences prefs = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE);
         Boolean fromNotification = prefs.getBoolean("fromNotification", false);
-        Log.i("dora", "on resume");
         populateGeofenceList();
 
         if (fromNotification == false) {
@@ -198,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
                 requestPermissions();
             } else if (!mGeofenceList.isEmpty()) {
                 Log.i("dora", "not empty start geofences");
+                checkGPS();
                 startGeoFences();
                 startTracking();
             } else {
@@ -327,10 +340,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         if (task.isSuccessful()) {
             updateGeofencesAdded(!getGeofencesAdded());
 
-            int messageId = getGeofencesAdded() ? R.string.geofences_added :
-                    R.string.geofences_removed;
-
-            Toast.makeText(this, getString(messageId), Toast.LENGTH_SHORT).show();
+           // int messageId = getGeofencesAdded() ? R.string.geofences_added : R.string.geofences_removed;
+           // Toast.makeText(this, getString(messageId), Toast.LENGTH_SHORT).show();
             PreferenceManager.getDefaultSharedPreferences(this)
                     .edit()
                     .putBoolean(Constants.GEOFENCES_ADDED_KEY, !getGeofencesAdded())

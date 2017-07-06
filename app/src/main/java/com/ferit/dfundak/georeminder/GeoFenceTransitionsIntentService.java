@@ -26,7 +26,6 @@ public class GeoFenceTransitionsIntentService extends IntentService {
     protected static final String TAG = "geofence-transitions-service";
 
     public GeoFenceTransitionsIntentService() {
-        // Use the TAG to name the worker thread.
         super(TAG);
     }
 
@@ -55,7 +54,7 @@ public class GeoFenceTransitionsIntentService extends IntentService {
 
             Log.i("dora", geofenceTransitionDetails.get(0));
         } else {
-            Log.i("dora", "error");
+            Log.i("dora", "error geofence enter");
         }
     }
 
@@ -91,13 +90,16 @@ public class GeoFenceTransitionsIntentService extends IntentService {
                 Log.i("dora", "activated " + mId + " " + mDescription + " " + mTitle);
                 triggeringGeofencesTitle += mTitle + " ";
                 triggeringGeofencesDesctiption += mDescription + " ";
-            }/*else{
-                triggeringGeofencesIdsString += triggeringGeofencesIdsList.get(0);
-                Log.i("dora", "else triggeringGeofencesIdsString: " + triggeringGeofencesIdsString );
-            }*/
+            }
         }
         title = geofenceTransitionString + ": " + triggeringGeofencesTitle;
 
+        if(title.equals(" ")){
+            title = "GeoReminder geo notification";
+        }
+        if(triggeringGeofencesDesctiption.equals(" ")){
+            triggeringGeofencesDesctiption = "You are on set location!";
+        }
         ArrayList<String> titleDescription = new ArrayList<>();
         titleDescription.add(title);
         titleDescription.add(triggeringGeofencesDesctiption);
