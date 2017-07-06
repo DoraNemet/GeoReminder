@@ -142,7 +142,6 @@ public class AddNewItem extends AppCompatActivity {
         }
 
         public void onTimeSet(TimePicker view, int hourPicked, int minutePicked) {
-            //todo srediti s append
             timeText.setText(hourPicked + ":" + minutePicked);
 
             hour = hourPicked;
@@ -428,7 +427,6 @@ public class AddNewItem extends AppCompatActivity {
         cal.set(Calendar.MINUTE, Integer.parseInt(partsTime[1]));
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        Log.i("dora", "time in ms:" + cal.getTimeInMillis());
         return cal.getTimeInMillis();
     }
 
@@ -490,7 +488,7 @@ public class AddNewItem extends AppCompatActivity {
         }
     }
 
-    //database connection
+    //database
     private reminderItem selectFromTableMet(int receivedID) {
         return DatabaseHandler.getInstance(this).selectFromTable(receivedID);
     }
@@ -516,7 +514,7 @@ public class AddNewItem extends AppCompatActivity {
 
         long alarmTime = getTime();
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
         Toast.makeText(AddNewItem.this, "Reminder set", Toast.LENGTH_SHORT).show();
 
     }

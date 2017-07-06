@@ -22,7 +22,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
@@ -36,8 +35,6 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-
-import static android.webkit.WebViewDatabase.getInstance;
 
 public class MainActivity extends AppCompatActivity implements OnCompleteListener<Void> {
 
@@ -205,11 +202,9 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         populateGeofenceList();
 
         if (fromNotification == false) {
-            Log.i("dora", "not from notification");
             if (!checkPermissions()) {
                 requestPermissions();
             } else if (!mGeofenceList.isEmpty()) {
-                Log.i("dora", "not empty start geofences");
                 checkGPS();
                 startGeoFences();
                 startTracking();
@@ -282,7 +277,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     }
 
     private void stopTracking() {
-        Log.d("dora", "Tracking stopped.");
         if (this.mLocationManager != null) {
             this.mLocationManager.removeUpdates(this.mLocationListener);
         }
@@ -308,8 +302,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
 
     //remove geofence
     public void removeGeofences() {
-        Log.i("dora", "REMOVING");
-
         mGeofencingClient.removeGeofences(getGeofencePendingIntent())
                 .addOnSuccessListener(this, new OnSuccessListener<Void>() {
                     @Override
@@ -340,14 +332,12 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         if (task.isSuccessful()) {
             updateGeofencesAdded(!getGeofencesAdded());
 
-           // int messageId = getGeofencesAdded() ? R.string.geofences_added : R.string.geofences_removed;
-           // Toast.makeText(this, getString(messageId), Toast.LENGTH_SHORT).show();
             PreferenceManager.getDefaultSharedPreferences(this)
                     .edit()
                     .putBoolean(Constants.GEOFENCES_ADDED_KEY, !getGeofencesAdded())
                     .apply();
         } else {
-            Log.w("dora", "error");
+            Log.w("dora", "add/remove geofence error");
         }
     }
 
@@ -370,9 +360,8 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
+    //populate list
     private void populateGeofenceList() {
-        Log.i("dora", "populate list");
-
         reminders = this.loadReminders();
 
         for (int i = 0; i < reminders.size(); i++) {
@@ -387,13 +376,10 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
             }
 
             long expirationInMilliseconds;
+            long GEOFENCE_EXPIRATION_IN_HOURS = 336;
 
-            if (mDate == null || mTime == null) {
-                long GEOFENCE_EXPIRATION_IN_HOURS = 336;
-                expirationInMilliseconds = GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
-            } else {
-                expirationInMilliseconds = getTimeInMs(mDate, mTime);
-            }
+            expirationInMilliseconds = GEOFENCE_EXPIRATION_IN_HOURS * 60 * 60 * 1000;
+
 
             if (mPinnedLocation == null) {
                 continue;
@@ -430,7 +416,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
         cal.set(Calendar.MINUTE, Integer.parseInt(partsTime[1]));
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        Log.i("dora", "time in ms:" + cal.getTimeInMillis());
         return cal.getTimeInMillis();
     }
 
@@ -449,7 +434,6 @@ public class MainActivity extends AppCompatActivity implements OnCompleteListene
     }
 
     private void requestPermissions() {
-        Log.i("dora", "request location permission");
         String[] permission = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
         ActivityCompat.requestPermissions(this, permission, REQUEST_LOCATION_PERMISSION);
     }

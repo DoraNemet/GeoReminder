@@ -9,7 +9,7 @@ public class Constants {
     private Constants() {
     }
 
-    private static final String PACKAGE_NAME = "com.google.android.gms.location.Geofence";
+    private static final String PACKAGE_NAME = "com.ferit.dfundak.georeminder;";
 
     static final String GEOFENCES_ADDED_KEY = PACKAGE_NAME + ".GEOFENCES_ADDED_KEY";
 

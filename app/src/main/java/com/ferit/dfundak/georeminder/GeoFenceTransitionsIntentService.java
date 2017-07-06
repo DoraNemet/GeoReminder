@@ -23,7 +23,7 @@ import static com.ferit.dfundak.georeminder.MainActivity.MY_PREFS_NAME;
  */
 
 public class GeoFenceTransitionsIntentService extends IntentService {
-    protected static final String TAG = "geofence-transitions-service";
+    protected static final String TAG = "geofence-transitions";
 
     public GeoFenceTransitionsIntentService() {
         super(TAG);
@@ -40,7 +40,7 @@ public class GeoFenceTransitionsIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
-            Log.i("dora", "error");
+            Log.i(TAG, "error geofencingEvent");
             return;
         }
          reminders = this.loadReminders();
@@ -52,9 +52,8 @@ public class GeoFenceTransitionsIntentService extends IntentService {
             ArrayList<String> geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition, triggeringGeofences);
             sendNotification(geofenceTransitionDetails.get(0), geofenceTransitionDetails.get(1));
 
-            Log.i("dora", geofenceTransitionDetails.get(0));
         } else {
-            Log.i("dora", "error geofence enter");
+            Log.i(TAG, "error geofence enter");
         }
     }
 
@@ -73,7 +72,6 @@ public class GeoFenceTransitionsIntentService extends IntentService {
         int j = 0;
         for (Geofence geofence : triggeringGeofences) {
             triggeringGeofencesIdsList.add(geofence.getRequestId());
-            Log.i("dora", "triggering " + triggeringGeofencesIdsList.get(j));
             j++;
         }
 
@@ -87,7 +85,6 @@ public class GeoFenceTransitionsIntentService extends IntentService {
             String mTitle = reminders.get(i).getTitle();
 
             if(triggeringGeofencesIdsList.contains(Integer.toString(mId))){
-                Log.i("dora", "activated " + mId + " " + mDescription + " " + mTitle);
                 triggeringGeofencesTitle += mTitle + " ";
                 triggeringGeofencesDesctiption += mDescription + " ";
             }
